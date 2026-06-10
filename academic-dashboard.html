@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduTrack — Sistema de Entregables Académicos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ===== RESET & ROOT ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #0f172a;
+  --navy-mid: #1e293b;
+  --navy-soft: #334155;
+  --surface: #f8fafc;
+  --surface-2: #f1f5f9;
+  --surface-3: #e2e8f0;
+  --border: #e2e8f0;
+  --border-mid: #cbd5e1;
+  --text-1: #0f172a;
+  --text-2: #475569;
+  --text-3: #94a3b8;
+  --indigo: #4f46e5;
+  --indigo-light: #eef2ff;
+  --indigo-mid: #818cf8;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --green-mid: #86efac;
+  --amber: #d97706;
+  --amber-light: #fffbeb;
+  --amber-mid: #fcd34d;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --red-mid: #fca5a5;
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text-1);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== LAYOUT ===== */
+.app { display: flex; min-height: 100vh; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 240px;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--indigo);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.logo-text { color: #fff; font-size: 16px; font-weight: 600; letter-spacing: -.3px; }
+.logo-sub { color: rgba(255,255,255,.35); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-top: 1px; }
+
+.sidebar-nav { padding: 16px 12px; flex: 1; }
+.nav-section-label {
+  color: rgba(255,255,255,.25);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 0 8px;
+  margin: 16px 0 6px;
+  font-weight: 500;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  color: rgba(255,255,255,.55);
+  cursor: pointer;
+  transition: all .15s;
+  font-size: 13.5px;
+  font-weight: 400;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.nav-item.active { background: var(--indigo); color: #fff; font-weight: 500; }
+.nav-item .nav-icon { font-size: 16px; width: 18px; text-align: center; opacity: .8; }
+.nav-item.active .nav-icon { opacity: 1; }
+
+.sidebar-role-switch {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+  transition: background .15s;
+}
+.role-badge:hover { background: rgba(255,255,255,.1); }
+.role-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+}
+.role-info { flex: 1; }
+.role-name { color: #fff; font-size: 12.5px; font-weight: 500; line-height: 1.2; }
+.role-label { color: rgba(255,255,255,.35); font-size: 11px; }
+.switch-icon { color: rgba(255,255,255,.35); font-size: 14px; }
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-title { font-size: 15px; font-weight: 600; color: var(--text-1); }
+.topbar-breadcrumb { color: var(--text-3); font-size: 13px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.topbar-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: all .15s;
+  font-size: 16px;
+}
+.topbar-btn:hover { background: var(--surface-2); color: var(--text-1); }
+
+/* ===== PAGE CONTENT ===== */
+.page { padding: 28px 32px; max-width: 1200px; }
+.page-view { display: none; }
+.page-view.active { display: block; }
+
+/* ===== STAT CARDS ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-label { font-size: 11.5px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 600; line-height: 1; color: var(--text-1); margin-bottom: 4px; }
+.stat-sub { font-size: 12px; color: var(--text-2); }
+.stat-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.section-sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+.section-action {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--indigo);
+  color: #fff;
+  font-size: 12.5px; font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+}
+.section-action:hover { background: #4338ca; }
+.section-action .btn-icon { font-size: 14px; }
+
+/* ===== STATUS BADGES ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.badge-green { background: var(--green-light); color: #15803d; }
+.badge-green .badge-dot { background: #16a34a; }
+.badge-amber { background: var(--amber-light); color: #b45309; }
+.badge-amber .badge-dot { background: #d97706; }
+.badge-red { background: var(--red-light); color: #b91c1c; }
+.badge-red .badge-dot { background: #dc2626; }
+.badge-blue { background: var(--blue-light); color: #1d4ed8; }
+.badge-blue .badge-dot { background: #2563eb; }
+.badge-gray { background: var(--surface-2); color: var(--text-2); }
+.badge-gray .badge-dot { background: var(--text-3); }
+.badge-indigo { background: var(--indigo-light); color: #4338ca; }
+.badge-indigo .badge-dot { background: var(--indigo); }
+
+/* ===== TASK CARDS ===== */
+.tasks-list { display: flex; flex-direction: column; gap: 10px; }
+.task-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all .18s;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-left: 3px solid transparent;
+}
+.task-card:hover { box-shadow: var(--shadow-md); border-color: var(--indigo-mid); transform: translateY(-1px); }
+.task-card.status-pending { border-left-color: var(--indigo); }
+.task-card.status-soon { border-left-color: var(--amber); }
+.task-card.status-submitted { border-left-color: var(--green); }
+.task-card.status-closed { border-left-color: var(--red); border-left-style: solid; opacity: .7; }
+.task-card.status-graded { border-left-color: var(--blue); }
+
+.task-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.task-icon-indigo { background: var(--indigo-light); color: var(--indigo); }
+.task-icon-amber { background: var(--amber-light); color: var(--amber); }
+.task-icon-green { background: var(--green-light); color: var(--green); }
+.task-icon-red { background: var(--red-light); color: var(--red); }
+.task-icon-blue { background: var(--blue-light); color: var(--blue); }
+
+.task-info { flex: 1; min-width: 0; }
+.task-name { font-size: 14px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-meta { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.task-meta-item { display: flex; align-items: center; gap: 4px; }
+.task-meta-icon { font-size: 13px; }
+.task-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.task-countdown {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--amber);
+  background: var(--amber-light);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+.task-countdown.urgent { color: var(--red); background: var(--red-light); animation: pulse-bg 1.5s ease infinite; }
+.task-countdown.done { color: var(--green); background: var(--green-light); font-family: var(--font); font-size: 11.5px; }
+.task-countdown.closed { color: var(--text-3); background: var(--surface-2); font-family: var(--font); font-size: 11.5px; }
+
+@keyframes pulse-bg { 0%,100% { opacity:1 } 50% { opacity:.65 } }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 56px 32px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+.empty-icon { font-size: 40px; color: var(--text-3); margin-bottom: 14px; }
+.empty-title { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+.empty-desc { font-size: 13px; color: var(--text-3); max-width: 280px; margin: 0 auto; }
+
+/* ===== SCORE BADGE ===== */
+.score-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  background: var(--blue-light);
+  color: var(--blue);
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--mono);
+}
+.score-pill .score-max { font-size: 11px; color: #3b82f6; font-weight: 400; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.55);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn .2s ease;
+}
+@keyframes modalIn { from { opacity:0; transform: translateY(12px) scale(.98) } to { opacity:1; transform: none } }
+
+.modal-header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.modal-title-block { flex: 1; }
+.modal-title { font-size: 17px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
+.modal-sub { font-size: 12.5px; color: var(--text-3); }
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.modal-close:hover { background: var(--surface-2); }
+.modal-body { padding: 20px 24px 24px; }
+
+/* ===== COUNTDOWN RING ===== */
+.countdown-block {
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.countdown-timer {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+.countdown-unit { text-align: center; }
+.countdown-num {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 500;
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  min-width: 48px;
+  text-align: center;
+  border: 1px solid var(--border);
+  line-height: 1;
+  color: var(--text-1);
+}
+.countdown-num.urgent { color: var(--red); border-color: var(--red-mid); background: var(--red-light); }
+.countdown-sep { font-size: 20px; font-weight: 300; color: var(--text-3); line-height: 44px; }
+.countdown-label { font-size: 10px; color: var(--text-3); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+.timeline-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.timeline-item {
+  flex: 1;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.timeline-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-3); margin-bottom: 4px; font-weight: 500; }
+.timeline-date { font-size: 13px; font-weight: 500; color: var(--text-1); }
+
+/* ===== FORM ELEMENTS ===== */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12.5px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+.form-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13.5px;
+  color: var(--text-1);
+  background: #fff;
+  transition: border-color .15s;
+  outline: none;
+}
+.form-input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+.form-input::placeholder { color: var(--text-3); }
+.form-hint { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-error { font-size: 11.5px; color: var(--red); margin-top: 4px; display: none; }
+.form-error.show { display: block; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 20px;
+  background: var(--indigo);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  width: 100%;
+}
+.btn-primary:hover { background: #4338ca; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 18px;
+  background: none;
+  color: var(--text-2);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-secondary:hover { background: var(--surface-2); border-color: var(--indigo-mid); color: var(--indigo); }
+
+/* ===== DRIVE INPUT SPECIAL ===== */
+.drive-input-wrap { position: relative; }
+.drive-input-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: #ea4335;
+}
+.drive-input { padding-left: 34px !important; }
+
+.review-block {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+.review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.review-status-label { font-size: 13px; font-weight: 500; }
+.review-comment { font-size: 13px; color: var(--text-2); font-style: italic; line-height: 1.5; }
+
+/* ===== TEACHER TABLE ===== */
+.table-wrap {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.table-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.table-search-wrap { position: relative; flex: 0 0 240px; }
+.table-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-3); }
+.table-search {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  outline: none;
+  transition: all .15s;
+}
+.table-search:focus { border-color: var(--indigo); background: #fff; }
+.table-search::placeholder { color: var(--text-3); }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 13px 16px;
+  font-size: 13px;
+  color: var(--text-1);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-2); }
+.td-student { display: flex; align-items: center; gap: 10px; }
+.student-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  flex-shrink: 0;
+}
+.student-name { font-weight: 500; font-size: 13px; }
+.student-email { font-size: 11.5px; color: var(--text-3); }
+
+.drive-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--blue);
+  font-size: 12.5px;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--blue-light);
+  background: var(--blue-light);
+  transition: all .15s;
+}
+.drive-link:hover { background: #dbeafe; }
+.drive-link-icon { font-size: 13px; }
+
+.btn-grade {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-grade:hover { background: var(--indigo-light); border-color: var(--indigo-mid); color: var(--indigo); }
+.btn-grade.graded { background: var(--blue-light); border-color: #93c5fd; color: var(--blue); }
+.btn-grade.graded:hover { background: #dbeafe; }
+
+.timestamp-cell { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); }
+
+/* ===== CREATE FORM CARD ===== */
+.form-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 26px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 28px;
+}
+.form-card-title { font-size: 14px; font-weight: 600; color: var(--text-1); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.form-card-icon { font-size: 18px; color: var(--indigo); }
+
+.form-divider { height: 1px; background: var(--border); margin: 18px 0; }
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ===== GRADE MODAL ===== */
+.grade-input-big {
+  font-size: 32px;
+  font-weight: 600;
+  font-family: var(--mono);
+  text-align: center;
+  width: 120px;
+  margin: 0 auto 4px;
+  display: block;
+  padding: 10px;
+  border: 2px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  color: var(--text-1);
+  transition: border-color .15s;
+}
+.grade-input-big:focus { outline: none; border-color: var(--indigo); }
+.grade-max { text-align: center; font-size: 12px; color: var(--text-3); margin-bottom: 20px; }
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar-wrap { background: var(--surface-3); border-radius: 100px; height: 6px; overflow: hidden; margin-top: 8px; }
+.progress-bar { height: 100%; border-radius: 100px; background: var(--indigo); transition: width .4s ease; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .sidebar { width: 56px; }
+  .sidebar .logo-text, .sidebar .logo-sub, .sidebar .nav-item span:not(.nav-icon),
+  .sidebar .nav-section-label, .sidebar .role-info, .sidebar .switch-icon { display: none; }
+  .main { margin-left: 56px; }
+  .sidebar-logo { padding: 16px 12px; }
+  .nav-item { padding: 10px; justify-content: center; }
+  .role-badge { padding: 8px; justify-content: center; }
+  .form-row { grid-template-columns: 1fr; }
+  .page { padding: 20px 16px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .topbar { padding: 0 16px; }
+}
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .timeline-row { flex-direction: column; }
+  .countdown-timer { gap: 4px; }
+  .countdown-num { font-size: 20px; min-width: 38px; padding: 5px 7px; }
+  th:nth-child(3), td:nth-child(3),
+  th:nth-child(4), td:nth-child(4) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">📚</div>
+        <div>
+          <div class="logo-text">EduTrack</div>
+          <div class="logo-sub">Entregables</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- Items injected by JS per role -->
+    </nav>
+    <div class="sidebar-role-switch">
+      <div class="role-badge" onclick="switchRole()" title="Cambiar vista">
+        <div class="role-avatar" id="sidebarAvatar"></div>
+        <div class="role-info">
+          <div class="role-name" id="sidebarRoleName"></div>
+          <div class="role-label" id="sidebarRoleLabel"></div>
+        </div>
+        <span class="switch-icon">⇄</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title" id="topbarTitle"></span>
+        <span class="topbar-breadcrumb" id="topbarBreadcrumb"></span>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" title="Notificaciones">🔔</button>
+        <button class="topbar-btn" title="Configuración">⚙️</button>
+      </div>
+    </header>
+
+    <div class="page">
+
+      <!-- ========== STUDENT VIEW ========== -->
+      <div class="page-view" id="view-student">
+
+        <!-- Stats -->
+        <div class="stats-grid" id="studentStats"></div>
+
+        <!-- Task list -->
+        <div class="section-header">
+          <div>
+            <div class="section-title">Mis Entregables</div>
+            <div class="section-sub">Haz clic en cualquier tarea para ver el detalle y entregar</div>
+          </div>
+          <div id="filterBtns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <div class="tasks-list" id="tasksList"></div>
+
+      </div><!-- /student view -->
+
+      <!-- ========== TEACHER VIEW ========== -->
+      <div class="page-view" id="view-teacher">
+
+        <!-- Create form -->
+        <div class="form-card">
+          <div class="form-card-title"><span class="form-card-icon">✏️</span> Crear Nueva Asignación</div>
+          <div class="form-row">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Título de la tarea *</label>
+              <input id="f-title" type="text" class="form-input" placeholder="Ej: Proyecto Final de Estadística" />
+              <div class="form-error" id="e-title">El título es obligatorio.</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción / Instrucciones</label>
+            <textarea id="f-desc" class="form-input" rows="3" placeholder="Describe qué deben entregar los alumnos, criterios de evaluación, formato esperado..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">📅 Fecha y hora de apertura *</label>
+              <input id="f-open" type="datetime-local" class="form-input" />
+              <div class="form-error" id="e-dates">Verifica las fechas ingresadas.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">🔒 Fecha y hora de cierre *</label>
+              <input id="f-close" type="datetime-local" class="form-input" />
+            </div>
+          </div>
+          <div class="form-divider"></div>
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="clearForm()">Limpiar</button>
+            <button class="btn-primary" style="width:auto;padding:10px 28px" onclick="createAssignment()">
+              <span>✚</span> Publicar Asignación
+            </button>
+          </div>
+        </div>
+
+        <!-- Tracking table -->
+        <div class="section-header">
+          <div>
+            <div class="section-title">Matriz de Seguimiento</div>
+            <div class="section-sub" id="teacherSubheading"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="teacherAssignmentSelect" style="font-size:13px;color:var(--text-2)"></span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header-row">
+            <div>
+              <span style="font-size:13px;font-weight:500;color:var(--text-1)" id="tableTaskTitle"></span>
+            </div>
+            <div class="table-search-wrap">
+              <span class="table-search-icon">🔍</span>
+              <input type="text" class="table-search" placeholder="Buscar alumno..." id="studentSearch" oninput="filterStudents()"/>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:200px">Alumno</th>
+                  <th>Enlace Drive</th>
+                  <th>Timestamp entrega</th>
+                  <th>Auditoría</th>
+                  <th>Calificación</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /teacher view -->
+
+    </div><!-- /page -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ===== TASK DETAIL MODAL ===== -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-title" id="modalTaskName"></div>
+        <div class="modal-sub" id="modalTaskCourse"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('taskModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="modalTaskDesc" style="font-size:13.5px;color:var(--text-2);margin-bottom:18px;line-height:1.6"></p>
+
+      <!-- Timeline -->
+      <div class="timeline-row">
+        <div class="timeline-item">
+          <div class="timeline-label">🟢 Apertura</div>
+          <div class="timeline-date" id="modalOpen"></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-label">🔴 Cierre estricto</div>
+          <div class="timeline-date" id="modalClose"></div>
+        </div>
+      </div>
+
+      <!-- Countdown -->
+      <div class="countdown-block" id="countdownBlock">
+        <div style="flex:1">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-3);margin-bottom:8px;font-weight:500">⏱ Tiempo restante</div>
+          <div class="countdown-timer" id="countdownTimer"></div>
+        </div>
+        <div id="countdownStatus"></div>
+      </div>
+
+      <!-- Delivery -->
+      <div id="deliverySection">
+        <div class="form-group">
+          <label class="form-label">🔗 Enlace de Google Drive *</label>
+          <div class="drive-input-wrap">
+            <span class="drive-input-icon">▲</span>
+            <input type="url" class="form-input drive-input" id="driveInput" placeholder="https://drive.google.com/file/d/..." />
+          </div>
+          <div class="form-hint">Asegúrate de que el enlace sea público o con acceso "Cualquier persona con el enlace".</div>
+          <div class="form-error" id="driveError">Ingresa un enlace válido de Google Drive.</div>
+        </div>
+        <button class="btn-primary" onclick="submitDelivery()">
+          <span>📤</span> Enviar Entrega
+        </button>
+      </div>
+
+      <!-- Review status -->
+      <div class="review-block" id="reviewBlock" style="display:none">
+        <div class="review-header" id="reviewHeader"></div>
+        <div class="review-comment" id="reviewComment"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== GRADE MODAL ===== -->
+<div class="modal-overlay" id="gradeModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-title">Calificar Entrega</div>
+        <div class="modal-sub" id="gradeStudentName"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('gradeModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:20px">
+        <a id="gradeDriveLink" href="#" target="_blank" class="drive-link" style="margin-bottom:14px;display:inline-flex">
+          <span class="drive-link-icon">🔗</span> Ver entrega en Drive
+        </a>
+        <div id="gradeTimestamp" style="font-size:12px;color:var(--text-3);margin-top:6px"></div>
+      </div>
+      <label class="form-label" style="text-align:center;display:block;margin-bottom:8px">Nota (sobre 20)</label>
+      <input type="number" class="grade-input-big" id="gradeInput" min="0" max="20" placeholder="—" />
+      <div class="grade-max">/ 20 puntos</div>
+      <div class="form-group">
+        <label class="form-label">Retroalimentación para el alumno</label>
+        <textarea class="form-input" id="gradeFeedback" rows="3" placeholder="Escribe un comentario constructivo..."></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveGrade()"><span>✅</span> Guardar Calificación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" style="
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  background:var(--navy); color:#fff;
+  padding:12px 18px; border-radius:var(--radius-md);
+  font-size:13px; font-weight:500;
+  box-shadow: var(--shadow-lg);
+  display:none;
+  align-items:center; gap:8px;
+  animation: slideIn .2s ease;
+  max-width: 320px;
+"></div>
+
+<style>
+@keyframes slideIn { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform:none } }
+</style>
+
+<script>
+/* ===================================================
+   DATA LAYER — Sample data (replace with API calls)
+=================================================== */
+const ASSIGNMENTS = [
+  {
+    id: 1,
+    title: "Informe de Análisis Estadístico",
+    description: "Elabora un informe completo aplicando técnicas de estadística descriptiva e inferencial al dataset proporcionado. Incluye gráficos, tablas y conclusiones bien fundamentadas.",
+    course: "Estadística Aplicada — Grupo B",
+    open: new Date(Date.now() - 3 * 86400000),
+    close: new Date(Date.now() + 2 * 3600000 + 18 * 60000), // ~2h 18m left
+    icon: "📊",
+    iconClass: "task-icon-amber"
+  },
+  {
+    id: 2,
+    title: "Exposición: Inteligencia Artificial",
+    description: "Prepara una presentación de 10 diapositivas sobre el impacto de la IA en el sector educativo. Cita al menos 5 fuentes académicas publicadas después de 2020.",
+    course: "Tecnologías Emergentes — Grupo A",
+    open: new Date(Date.now() - 7 * 86400000),
+    close: new Date(Date.now() - 2 * 86400000),
+    icon: "🤖",
+    iconClass: "task-icon-red"
+  },
+  {
+    id: 3,
+    title: "Diseño de Base de Datos Relacional",
+    description: "Modela y normaliza hasta 3FN un sistema de gestión de biblioteca. Incluye el diagrama ER, el script SQL de creación y 10 consultas de prueba.",
+    course: "Bases de Datos — Grupo C",
+    open: new Date(Date.now() - 2 * 86400000),
+    close: new Date(Date.now() + 5 * 86400000),
+    icon: "🗄️",
+    iconClass: "task-icon-indigo"
+  },
+  {
+    id: 4,
+    title: "Ensayo: Ética Profesional en Ingeniería",
+    description: "Redacta un ensayo de 2000–2500 palabras sobre dilemas éticos en el ejercicio de la ingeniería de software. Estructura: introducción, desarrollo (3 puntos clave), conclusión.",
+    course: "Ética Profesional — Grupo A",
+    open: new Date(Date.now() - 10 * 86400000),
+    close: new Date(Date.now() - 5 * 86400000),
+    submittedAt: new Date(Date.now() - 6 * 86400000),
+    driveLink: "https://drive.google.com/file/d/example1",
+    grade: 17,
+    feedback: "Excelente análisis del código deontológico. La argumentación es sólida y bien fundamentada. Sugiero profundizar en casos reales para la próxima entrega.",
+    icon: "📝",
+    iconClass: "task-icon-green"
+  },
+  {
+    id: 5,
+    title: "Práctica de Programación Orientada a Objetos",
+    description: "Implementa un sistema de gestión de inventario usando los principios SOLID. Debe incluir al menos 5 clases, herencia, polimorfismo e interfaces.",
+    course: "POO Avanzada — Grupo B",
+    open: new Date(Date.now() - 1 * 86400000),
+    close: new Date(Date.now() + 18 * 3600000),
+    submittedAt: new Date(Date.now() - 0.5 * 86400000),
+    driveLink: "https://drive.google.com/file/d/example2",
+    grade: null,
+    feedback: null,
+    icon: "💻",
+    iconClass: "task-icon-blue"
+  }
+];
+
+const STUDENTS = [
+  { id:1, name:"Valentina Torres", email:"v.torres@uni.edu.pe", initials:"VT", color:"#818cf8", bg:"#eef2ff" },
+  { id:2, name:"Rodrigo Mamani", email:"r.mamani@uni.edu.pe", initials:"RM", color:"#16a34a", bg:"#f0fdf4" },
+  { id:3, name:"Camila Quispe", email:"c.quispe@uni.edu.pe", initials:"CQ", color:"#d97706", bg:"#fffbeb" },
+  { id:4, name:"Álvaro Benítez", email:"a.benitez@uni.edu.pe", initials:"AB", color:"#dc2626", bg:"#fef2f2" },
+  { id:5, name:"Sofía Herrera", email:"s.herrera@uni.edu.pe", initials:"SH", color:"#0891b2", bg:"#ecfeff" },
+  { id:6, name:"Felipe Condori", email:"f.condori@uni.edu.pe", initials:"FC", color:"#9333ea", bg:"#faf5ff" },
+];
+
+const SUBMISSIONS = {
+  1: [
+    { studentId:1, driveLink:"https://drive.google.com/file/d/s1a1", submittedAt: new Date(Date.now() - 25*3600000), grade:18, feedback:"Muy buen trabajo, análisis preciso." },
+    { studentId:2, driveLink:"https://drive.google.com/file/d/s2a1", submittedAt: new Date(Date.now() - 0.3*3600000), grade:null, feedback:null },
+    { studentId:3, driveLink:null, submittedAt:null, grade:null, feedback:null },
+    { studentId:4, driveLink:"https://drive.google.com/file/d/s4a1", submittedAt: new Date(Date.now() - 48*3600000), grade:14, feedback:"Falta mayor profundidad en el análisis." },
+    { studentId:5, driveLink:null, submittedAt:null, grade:null, feedback:null },
+    { studentId:6, driveLink:"https://drive.google.com/file/d/s6a1", submittedAt: new Date(Date.now() - 1*3600000), grade:null, feedback:null },
+  ]
+};
+
+/* ===================================================
+   STATE
+=================================================== */
+let currentRole = 'student'; // 'student' | 'teacher'
+let currentTaskId = null;
+let currentGradeStudentId = null;
+let countdownInterval = null;
+let filterStatus = 'all';
+
+/* ===================================================
+   HELPERS
+=================================================== */
+function fmtDate(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function fmtTimestamp(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' }) + ' ' +
+         d.toLocaleTimeString('es-PE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+function msToCountdown(ms) {
+  if (ms <= 0) return { d:0, h:0, m:0, s:0, done:true };
+  let s = Math.floor(ms/1000);
+  let m = Math.floor(s/60); s %= 60;
+  let h = Math.floor(m/60); m %= 60;
+  let d = Math.floor(h/24); h %= 24;
+  return { d, h, m, s, done:false };
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+function getStatus(task) {
+  const now = Date.now();
+  if (task.grade !== undefined && task.grade !== null) return 'graded';
+  if (task.submittedAt) return 'submitted';
+  if (now > task.close.getTime()) return 'closed';
+  if (task.close.getTime() - now < 24*3600000) return 'soon';
+  return 'pending';
+}
+function statusInfo(s) {
+  const map = {
+    pending:   { label:'A tiempo',       badge:'badge-indigo', icon:'📋', cardClass:'status-pending' },
+    soon:      { label:'Por vencer',     badge:'badge-amber',  icon:'⚠️',  cardClass:'status-soon'    },
+    submitted: { label:'Entregado',      badge:'badge-green',  icon:'✅',  cardClass:'status-submitted'},
+    closed:    { label:'Cerrado',        badge:'badge-red',    icon:'🔒',  cardClass:'status-closed'  },
+    graded:    { label:'Calificado',     badge:'badge-blue',   icon:'⭐',  cardClass:'status-graded'  },
+  };
+  return map[s] || map.pending;
+}
+function showToast(msg, emoji = '✅') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${emoji}</span> ${msg}`;
+  t.style.display = 'flex';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+/* ===================================================
+   ROLE MANAGEMENT
+=================================================== */
+function setRole(role) {
+  currentRole = role;
+  const isStudent = role === 'student';
+
+  // Sidebar avatar
+  const av = document.getElementById('sidebarAvatar');
+  av.textContent = isStudent ? 'YO' : 'PR';
+  av.style.background = isStudent ? '#4f46e5' : '#0891b2';
+  av.style.color = '#fff';
+  document.getElementById('sidebarRoleName').textContent = isStudent ? 'Ana García' : 'Prof. Ramírez';
+  document.getElementById('sidebarRoleLabel').textContent = isStudent ? 'Alumno — Ing. Sistemas' : 'Docente — Ing. Sistemas';
+
+  // Nav
+  const nav = document.getElementById('sidebarNav');
+  if (isStudent) {
+    nav.innerHTML = `
+      <div class="nav-section-label">Principal</div>
+      <button class="nav-item active"><span class="nav-icon">📋</span><span>Mis Entregables</span></button>
+      <button class="nav-item"><span class="nav-icon">📅</span><span>Cronograma</span></button>
+      <div class="nav-section-label">Académico</div>
+      <button class="nav-item"><span class="nav-icon">📊</span><span>Mis Calificaciones</span></button>
+      <button class="nav-item"><span class="nav-icon">📚</span><span>Mis Cursos</span></button>
+    `;
+  } else {
+    nav.innerHTML = `
+      <div class="nav-section-label">Gestión</div>
+      <button class="nav-item active"><span class="nav-icon">🎛️</span><span>Seguimiento</span></button>
+      <button class="nav-item"><span class="nav-icon">📋</span><span>Asignaciones</span></button>
+      <div class="nav-section-label">Análisis</div>
+      <button class="nav-item"><span class="nav-icon">📊</span><span>Estadísticas</span></button>
+      <button class="nav-item"><span class="nav-icon">👥</span><span>Mis Alumnos</span></button>
+    `;
+  }
+
+  // Topbar
+  document.getElementById('topbarTitle').textContent = isStudent ? 'Panel del Alumno' : 'Panel del Profesor';
+  document.getElementById('topbarBreadcrumb').textContent = isStudent ? '→ Mis Entregables' : '→ Seguimiento y Auditoría';
+
+  // Views
+  document.getElementById('view-student').classList.toggle('active', isStudent);
+  document.getElementById('view-teacher').classList.toggle('active', !isStudent);
+
+  if (isStudent) renderStudentDashboard();
+  else renderTeacherDashboard();
+}
+
+function switchRole() {
+  setRole(currentRole === 'student' ? 'teacher' : 'student');
+  showToast(currentRole === 'student' ? 'Vista de Alumno activada' : 'Vista de Profesor activada', '🔄');
+}
+
+/* ===================================================
+   STUDENT DASHBOARD
+=================================================== */
+function renderStudentDashboard() {
+  renderStats();
+  renderTasks();
+}
+
+function renderStats() {
+  const statuses = ASSIGNMENTS.map(getStatus);
+  const stats = [
+    { label:'Total tareas', value: ASSIGNMENTS.length, sub:'este período', dot: '#4f46e5' },
+    { label:'A tiempo', value: statuses.filter(s=>s==='pending').length, sub:'sin entregar', dot:'#4f46e5' },
+    { label:'Por vencer', value: statuses.filter(s=>s==='soon').length, sub:'menos de 24h', dot:'#d97706' },
+    { label:'Entregadas', value: statuses.filter(s=>s==='submitted'||s==='graded').length, sub:'calificadas y pendientes', dot:'#16a34a' },
+  ];
+  document.getElementById('studentStats').innerHTML = stats.map(s=>`
+    <div class="stat-card">
+      <div class="stat-label"><span class="stat-dot" style="background:${s.dot}"></span>${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${(s.value/ASSIGNMENTS.length*100).toFixed(0)}%;background:${s.dot}"></div></div>
+    </div>
+  `).join('');
+}
+
+function renderTasks() {
+  const container = document.getElementById('tasksList');
+  let filtered = filterStatus === 'all' ? ASSIGNMENTS : ASSIGNMENTS.filter(t => getStatus(t) === filterStatus);
+
+  // Filter buttons
+  const filters = [
+    { key:'all', label:'Todas' },
+    { key:'pending', label:'A tiempo' },
+    { key:'soon', label:'Por vencer' },
+    { key:'submitted', label:'Entregadas' },
+    { key:'graded', label:'Calificadas' },
+    { key:'closed', label:'Cerradas' },
+  ];
+  document.getElementById('filterBtns').innerHTML = filters.map(f=>`
+    <button onclick="setFilter('${f.key}')" style="
+      padding:5px 12px; border-radius:100px; font-size:12px; font-weight:500; cursor:pointer;
+      border: 1px solid ${filterStatus===f.key ? 'var(--indigo)' : 'var(--border-mid)'};
+      background: ${filterStatus===f.key ? 'var(--indigo)' : 'none'};
+      color: ${filterStatus===f.key ? '#fff' : 'var(--text-2)'};
+      transition: all .15s;
+    ">${f.label}</button>
+  `).join('');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">Sin tareas en esta categoría</div>
+        <div class="empty-desc">No hay entregables que coincidan con el filtro seleccionado.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(task => {
+    const s = getStatus(task);
+    const si = statusInfo(s);
+    const now = Date.now();
+    const remaining = task.close.getTime() - now;
+    const { d, h, m, done } = msToCountdown(remaining);
+
+    let countdownHtml = '';
+    if (s === 'soon') {
+      const urgent = remaining < 3600000;
+      countdownHtml = `<div class="task-countdown ${urgent ? 'urgent' : ''}">⏱ ${d}d ${pad(h)}h ${pad(m)}m</div>`;
+    } else if (s === 'pending') {
+      countdownHtml = `<div class="task-countdown">${d}d ${pad(h)}h restantes</div>`;
+    } else if (s === 'submitted') {
+      countdownHtml = `<div class="task-countdown done">✅ Entregado</div>`;
+    } else if (s === 'graded') {
+      countdownHtml = `<div class="task-countdown done">⭐ ${task.grade}/20</div>`;
+    } else if (s === 'closed') {
+      countdownHtml = `<div class="task-countdown closed">🔒 Cerrado</div>`;
+    }
+
+    return `
+      <div class="task-card ${si.cardClass}" onclick="openTaskModal(${task.id})">
+        <div class="task-icon ${task.iconClass}">${task.icon}</div>
+        <div class="task-info">
+          <div class="task-name">${task.title}</div>
+          <div class="task-meta">
+            <span class="task-meta-item"><span class="task-meta-icon">📚</span>${task.course}</span>
+            <span class="task-meta-item"><span class="task-meta-icon">📅</span>Cierre: ${fmtDate(task.close)}</span>
+          </div>
+        </div>
+        <div class="task-right">
+          <span class="badge ${si.badge}"><span class="badge-dot"></span>${si.label}</span>
+          ${countdownHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setFilter(key) {
+  filterStatus = key;
+  renderTasks();
+}
+
+/* ===================================================
+   TASK MODAL
+=================================================== */
+function openTaskModal(taskId) {
+  currentTaskId = taskId;
+  const task = ASSIGNMENTS.find(t => t.id === taskId);
+  if (!task) return;
+  const s = getStatus(task);
+
+  document.getElementById('modalTaskName').textContent = task.title;
+  document.getElementById('modalTaskCourse').textContent = task.course;
+  document.getElementById('modalTaskDesc').textContent = task.description;
+  document.getElementById('modalOpen').textContent = fmtDate(task.open);
+  document.getElementById('modalClose').textContent = fmtDate(task.close);
+
+  // Countdown
+  if (countdownInterval) clearInterval(countdownInterval);
+  function updateCountdown() {
+    const remaining = task.close.getTime() - Date.now();
+    const { d, h, m, s: sec, done } = msToCountdown(remaining);
+    const urgent = remaining < 3*3600000 && !done;
+    const urgentClass = urgent ? 'urgent' : '';
+    document.getElementById('countdownTimer').innerHTML = done ? `
+      <div class="countdown-unit">
+        <div class="countdown-num closed" style="font-size:14px;min-width:auto;padding:8px 14px;color:var(--text-3)">Tiempo agotado</div>
+      </div>
+    ` : `
+      ${d > 0 ? `<div class="countdown-unit"><div class="countdown-num ${urgentClass}">${pad(d)}</div><div class="countdown-label">días</div></div><span class="countdown-sep">:</span>` : ''}
+      <div class="countdown-unit"><div class="countdown-num ${urgentClass}">${pad(h)}</div><div class="countdown-label">horas</div></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><div class="countdown-num ${urgentClass}">${pad(m)}</div><div class="countdown-label">min</div></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><div class="countdown-num ${urgentClass}">${pad(sec)}</div><div class="countdown-label">seg</div></div>
+    `;
+    const statusEl = document.getElementById('countdownStatus');
+    if (done) statusEl.innerHTML = `<span class="badge badge-red">🔒 Cerrado</span>`;
+    else if (urgent) statusEl.innerHTML = `<span class="badge badge-amber">⚠️ Urgente</span>`;
+    else statusEl.innerHTML = `<span class="badge badge-green">🟢 Abierto</span>`;
+  }
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+
+  // Delivery section
+  const delivSec = document.getElementById('deliverySection');
+  const reviewBlock = document.getElementById('reviewBlock');
+  const driveInput = document.getElementById('driveInput');
+  document.getElementById('driveError').classList.remove('show');
+
+  if (s === 'closed' && !task.submittedAt) {
+    delivSec.style.display = 'none';
+    reviewBlock.style.display = 'none';
+  } else if (s === 'submitted') {
+    delivSec.style.display = 'block';
+    driveInput.value = task.driveLink || '';
+    driveInput.disabled = true;
+    reviewBlock.style.display = 'block';
+    document.getElementById('reviewHeader').innerHTML = `<span class="badge badge-gray">🕐 Sin calificar</span>`;
+    document.getElementById('reviewComment').textContent = 'Tu entrega está siendo revisada por el profesor.';
+  } else if (s === 'graded') {
+    delivSec.style.display = 'block';
+    driveInput.value = task.driveLink || '';
+    driveInput.disabled = true;
+    reviewBlock.style.display = 'block';
+    document.getElementById('reviewHeader').innerHTML = `
+      <span class="badge badge-blue">⭐ Calificado</span>
+      <div class="score-pill">${task.grade}<span class="score-max">/20</span></div>
+    `;
+    document.getElementById('reviewComment').textContent = task.feedback || 'Sin comentarios adicionales.';
+  } else {
+    delivSec.style.display = 'block';
+    driveInput.value = '';
+    driveInput.disabled = false;
+    reviewBlock.style.display = 'none';
+  }
+
+  document.getElementById('taskModal').classList.add('open');
+}
+
+function submitDelivery() {
+  const task = ASSIGNMENTS.find(t => t.id === currentTaskId);
+  if (!task) return;
+  const val = document.getElementById('driveInput').value.trim();
+  const errEl = document.getElementById('driveError');
+
+  if (!val || !val.startsWith('https://')) {
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+
+  // Update task
+  task.submittedAt = new Date();
+  task.driveLink = val;
+  task.grade = null;
+  task.feedback = null;
+
+  closeModal('taskModal');
+  renderStudentDashboard();
+  showToast('¡Entrega enviada correctamente!', '📤');
+}
+
+/* ===================================================
+   TEACHER DASHBOARD
+=================================================== */
+function renderTeacherDashboard() {
+  const task = ASSIGNMENTS[0]; // Show first assignment in table
+  document.getElementById('tableTaskTitle').textContent = `📋 ${task.title}`;
+  document.getElementById('teacherSubheading').textContent = `Mostrando entrega: ${task.course}`;
+
+  // Prefill datetime inputs
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  function toLocal(d) {
+    const dd = new Date(d.getTime() - offset * 60000);
+    return dd.toISOString().slice(0,16);
+  }
+  document.getElementById('f-open').value = toLocal(new Date());
+  document.getElementById('f-close').value = toLocal(new Date(Date.now() + 7*86400000));
+
+  renderStudentsTable(ASSIGNMENTS[0].id, '');
+}
+
+function renderStudentsTable(taskId, query) {
+  const submissions = SUBMISSIONS[taskId] || [];
+  const task = ASSIGNMENTS.find(t => t.id === taskId);
+  const tbody = document.getElementById('studentsTableBody');
+  const filtered = submissions.filter(sub => {
+    const st = STUDENTS.find(s => s.id === sub.studentId);
+    return !query || st.name.toLowerCase().includes(query.toLowerCase()) || st.email.toLowerCase().includes(query.toLowerCase());
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-3)">
+      <div style="font-size:28px;margin-bottom:10px">📭</div>
+      No se encontraron alumnos con ese criterio.
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(sub => {
+    const st = STUDENTS.find(s => s.id === sub.studentId);
+    const submitted = !!sub.submittedAt;
+    const onTime = submitted && sub.submittedAt <= task.close;
+
+    const auditBadge = !submitted
+      ? `<span class="badge badge-gray">— Sin entregar</span>`
+      : onTime
+        ? `<span class="badge badge-green"><span class="badge-dot"></span>A tiempo</span>`
+        : `<span class="badge badge-red"><span class="badge-dot"></span>Fuera de tiempo</span>`;
+
+    const driveCell = sub.driveLink
+      ? `<a href="${sub.driveLink}" target="_blank" class="drive-link"><span class="drive-link-icon">🔗</span>Ver Drive</a>`
+      : `<span style="color:var(--text-3);font-size:12.5px">Sin entrega</span>`;
+
+    const gradeCell = sub.grade !== null && sub.grade !== undefined
+      ? `<div class="score-pill">${sub.grade}<span class="score-max">/20</span></div>`
+      : `<span style="color:var(--text-3);font-size:12px">—</span>`;
+
+    const actionBtn = submitted
+      ? `<button class="btn-grade ${sub.grade !== null ? 'graded' : ''}" onclick="openGradeModal(${taskId},${sub.studentId})">
+           ${sub.grade !== null ? '✏️ Editar nota' : '📝 Calificar'}
+         </button>`
+      : `<button class="btn-grade" disabled style="opacity:.4;cursor:not-allowed">Sin entrega</button>`;
+
+    return `
+      <tr>
+        <td>
+          <div class="td-student">
+            <div class="student-avatar" style="background:${st.bg};color:${st.color}">${st.initials}</div>
+            <div>
+              <div class="student-name">${st.name}</div>
+              <div class="student-email">${st.email}</div>
+            </div>
+          </div>
+        </td>
+        <td>${driveCell}</td>
+        <td><div class="timestamp-cell">${fmtTimestamp(sub.submittedAt)}</div></td>
+        <td>${auditBadge}</td>
+        <td>${gradeCell}</td>
+        <td>${actionBtn}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterStudents() {
+  renderStudentsTable(ASSIGNMENTS[0].id, document.getElementById('studentSearch').value);
+}
+
+/* ===================================================
+   CREATE ASSIGNMENT
+=================================================== */
+function createAssignment() {
+  const title = document.getElementById('f-title').value.trim();
+  const desc = document.getElementById('f-desc').value.trim();
+  const open = document.getElementById('f-open').value;
+  const close = document.getElementById('f-close').value;
+
+  let valid = true;
+  document.getElementById('e-title').classList.remove('show');
+  document.getElementById('e-dates').classList.remove('show');
+
+  if (!title) { document.getElementById('e-title').classList.add('show'); valid = false; }
+  if (!open || !close || new Date(close) <= new Date(open)) {
+    document.getElementById('e-dates').classList.add('show');
+    document.getElementById('e-dates').textContent = !open || !close
+      ? 'Las fechas son obligatorias.'
+      : 'La fecha de cierre debe ser posterior a la apertura.';
+    valid = false;
+  }
+  if (!valid) return;
+
+  const newTask = {
+    id: ASSIGNMENTS.length + 1,
+    title, description: desc || 'Sin descripción adicional.',
+    course: 'Nueva Asignación — Grupo X',
+    open: new Date(open), close: new Date(close),
+    icon: '📄', iconClass: 'task-icon-indigo'
+  };
+  ASSIGNMENTS.push(newTask);
+  clearForm();
+  showToast(`Asignación "${title}" publicada`, '✅');
+  renderTeacherDashboard();
+}
+
+function clearForm() {
+  ['f-title','f-desc'].forEach(id => document.getElementById(id).value = '');
+  ['e-title','e-dates'].forEach(id => document.getElementById(id).classList.remove('show'));
+}
+
+/* ===================================================
+   GRADE MODAL
+=================================================== */
+function openGradeModal(taskId, studentId) {
+  const task = ASSIGNMENTS.find(t => t.id === taskId);
+  const st = STUDENTS.find(s => s.id === studentId);
+  const sub = SUBMISSIONS[taskId].find(s => s.studentId === studentId);
+  if (!task || !st || !sub) return;
+
+  currentGradeStudentId = { taskId, studentId };
+  document.getElementById('gradeStudentName').textContent = `${st.name} — ${task.title}`;
+  document.getElementById('gradeDriveLink').href = sub.driveLink || '#';
+  document.getElementById('gradeTimestamp').textContent = `Entregado: ${fmtTimestamp(sub.submittedAt)}`;
+  document.getElementById('gradeInput').value = sub.grade ?? '';
+  document.getElementById('gradeFeedback').value = sub.feedback ?? '';
+  document.getElementById('gradeModal').classList.add('open');
+}
+
+function saveGrade() {
+  if (!currentGradeStudentId) return;
+  const { taskId, studentId } = currentGradeStudentId;
+  const gradeVal = parseFloat(document.getElementById('gradeInput').value);
+  const feedback = document.getElementById('gradeFeedback').value.trim();
+
+  if (isNaN(gradeVal) || gradeVal < 0 || gradeVal > 20) {
+    showToast('Ingresa una nota entre 0 y 20', '⚠️'); return;
+  }
+
+  const sub = SUBMISSIONS[taskId].find(s => s.studentId === studentId);
+  sub.grade = gradeVal;
+  sub.feedback = feedback;
+
+  // Also update student view if matches
+  const task = ASSIGNMENTS.find(t => t.id === taskId);
+  if (task && task.submittedAt) {
+    task.grade = gradeVal;
+    task.feedback = feedback;
+  }
+
+  closeModal('gradeModal');
+  renderStudentsTable(taskId, document.getElementById('studentSearch').value);
+  showToast('Calificación guardada correctamente', '⭐');
+}
+
+/* ===================================================
+   MODAL HELPERS
+=================================================== */
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'taskModal' && countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+document.getElementById('taskModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('taskModal');
+});
+document.getElementById('gradeModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('gradeModal');
+});
+
+/* ===================================================
+   INIT
+=================================================== */
+setRole('student');
+</script>
+</body>
+</html>
