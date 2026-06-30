@@ -3,6 +3,7 @@ import { Search, UserCheck, UserX, RefreshCw, GraduationCap } from 'lucide-react
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
 import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import ModalMatricularIndividual from './ModalMatricularIndividual';
 import {
   getUsuarios,
@@ -73,22 +74,23 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
   };
 
   return (
-    <div className="lista-usuarios">
-      <div className="lista-usuarios-toolbar">
-        <div className="search-wrapper">
-          <Search size={16} className="search-icon" />
+    <Card className="p-6 space-y-6 text-left">
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="relative w-full sm:flex-1">
+          <Search size={16} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
           <input
             id="busqueda-usuario"
             type="text"
             placeholder="Buscar por nombre, código o correo…"
-            className="search-input"
+            className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
           />
         </div>
+        
         <select
           id="filtro-rol"
-          className="rol-select"
+          className="w-full sm:w-[160px] bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
           value={filtroRol}
           onChange={(e) => setFiltroRol(e.target.value)}
         >
@@ -97,69 +99,78 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
           <option value="profesor">Profesor</option>
           <option value="administrador">Administrador</option>
         </select>
-        <button className="btn btn-ghost btn-sm" onClick={fetchUsuarios} disabled={loading} title="Refrescar">
-          <RefreshCw size={14} className={loading ? 'spin-icon' : ''} />
-        </button>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={fetchUsuarios}
+          disabled={loading}
+        >
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+        </Button>
       </div>
 
       {error && (
-        <div className="admin-error-banner" style={{ marginBottom: '1rem' }}>
+        <div className="p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex items-center gap-2 text-xs font-semibold">
           <span>{error}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="admin-loading-center">
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
           <Spinner size="md" />
+          <p className="text-xs text-slate-400 font-bold">Cargando usuarios...</p>
         </div>
       ) : (
-        <>
-          <p className="text-subtitle" style={{ marginBottom: '0.75rem' }}>
+        <div className="space-y-4">
+          <p className="text-xs text-slate-400 font-semibold">
             {filtered.length} usuario{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
           </p>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="admin-table">
-              <thead>
+          
+          <div className="overflow-x-auto border border-slate-100 rounded-xl">
+            <table className="min-w-full divide-y divide-slate-100 text-xs">
+              <thead className="bg-slate-50/50">
                 <tr>
-                  <th>NOMBRE</th>
-                  <th>CÓDIGO</th>
-                  <th>CORREO</th>
-                  <th>ROL</th>
-                  <th>FACULTAD</th>
-                  <th>ESTADO</th>
-                  <th>ACCIÓN</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Nombre</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Código</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Correo</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Rol</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Facultad</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Acción</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-slate-100">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
+                    <td colSpan={7} className="text-center py-10 text-slate-400 font-semibold">
                       No se encontraron usuarios
                     </td>
                   </tr>
                 ) : (
                   filtered.map((u) => (
-                    <tr key={u.id}>
-                      <td>
-                        <div className="usuario-nombre">{u.nombre_completo}</div>
+                    <tr key={u.id} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-800 text-left">
+                        {u.nombre_completo}
                       </td>
-                      <td className="admin-td-mono">{u.codigo_institucional ?? '—'}</td>
-                      <td className="admin-td-email">{u.email}</td>
-                      <td>
+                      <td className="px-6 py-4 font-bold text-slate-700 font-mono">{u.codigo_institucional ?? '—'}</td>
+                      <td className="px-6 py-4 text-slate-500 font-semibold text-left max-w-[200px] truncate">{u.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <Badge
                           label={u.roles?.nombre ?? '—'}
                           variant={rolesBadge[u.roles?.nombre ?? ''] ?? 'neutral'}
                         />
                       </td>
-                      <td>{u.facultad ?? '—'}</td>
-                      <td>
+                      <td className="px-6 py-4 text-slate-600 font-medium text-left">{u.facultad ?? '—'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <Badge
                           label={u.estado}
                           variant={u.estado === 'activo' ? 'success' : 'error'}
                         />
                       </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-2">
                           {u.roles?.nombre === 'alumno' && (
                             <Button
                               variant="secondary"
@@ -178,7 +189,7 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
                             loading={actionLoading === u.id}
                             icon={u.estado === 'activo' ? <UserX size={14} /> : <UserCheck size={14} />}
                             onClick={() => handleToggleEstado(u)}
-                            className={u.estado === 'activo' ? 'btn-danger-ghost' : ''}
+                            className={u.estado === 'activo' ? 'text-red-600 hover:bg-red-50' : ''}
                           >
                             {u.estado === 'activo' ? 'Deshabilitar' : 'Habilitar'}
                           </Button>
@@ -190,7 +201,7 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
               </tbody>
             </table>
           </div>
-        </>
+        </div>
       )}
 
       {selectedAlumno && (
@@ -199,7 +210,7 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
           onClose={() => setSelectedAlumno(null)}
         />
       )}
-    </div>
+    </Card>
   );
 };
 

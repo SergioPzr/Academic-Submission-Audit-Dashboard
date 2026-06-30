@@ -6,6 +6,8 @@ import OperacionBadge from './OperacionBadge';
 import ExportarAuditoria from './ExportarAuditoria';
 import Spinner from '../../components/ui/Spinner';
 import Badge from '../../components/ui/Badge';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
 
 const LogAuditoria: React.FC = () => {
   const [logs, setLogs] = useState<LogType[]>([]);
@@ -58,21 +60,14 @@ const LogAuditoria: React.FC = () => {
   const totalPages = Math.max(Math.ceil(total / limit), 1);
 
   return (
-    <div className="admin-panel" style={{ padding: '2rem' }}>
+    <div className="space-y-6 text-left animate-fade-in">
       {message && (
         <div 
-          className="admin-error-banner" 
-          style={{ 
-            backgroundColor: message.type === 'success' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-            borderColor: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
-            color: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid'
+          className="p-4 border rounded-xl flex items-center gap-2 text-xs font-semibold"
+          style={{
+            backgroundColor: message.type === 'success' ? '#ECFDF5' : '#FEF2F2',
+            borderColor: message.type === 'success' ? '#A7F3D0' : '#FEE2E2',
+            color: message.type === 'success' ? '#065F46' : '#991B1B',
           }}
         >
           <Info size={16} />
@@ -81,13 +76,13 @@ const LogAuditoria: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="admin-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-h2" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Shield size={28} style={{ color: 'var(--color-primary-dark)' }} />
-            Log de Auditoría Global
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+            <Shield size={24} className="text-emerald-700" />
+            <span>Log de Auditoría Global</span>
           </h2>
-          <p className="text-subtitle" style={{ marginTop: '0.25rem' }}>
+          <p className="text-xs text-slate-400 font-medium mt-1">
             Trazabilidad profunda · cumple RF-21 y exportable bajo demanda
           </p>
         </div>
@@ -106,47 +101,45 @@ const LogAuditoria: React.FC = () => {
       />
 
       {/* Stats Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <p className="text-subtitle" style={{ margin: 0 }}>
+      <div className="flex justify-between items-center text-xs font-semibold text-slate-400">
+        <p>
           Mostrando {logs.length} de {total} eventos · ordenado desc por timestamp
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Badge label="Retención: 7 años (RF-21)" variant="neutral" />
-        </div>
+        <Badge label="Retención: 7 años (RF-21)" variant="neutral" />
       </div>
 
       {error && (
-        <div className="admin-error-banner" style={{ marginBottom: '1.5rem' }}>
-          <AlertTriangle size={16} />
+        <div className="p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex items-center gap-2 text-xs font-semibold">
+          <AlertTriangle size={16} className="text-red-600" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Table Card */}
-      <div className="card shadow-sm" style={{ padding: '0', overflow: 'hidden', backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+      <Card className="overflow-hidden border border-slate-100">
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <div className="flex justify-center items-center py-20">
             <Spinner size="lg" />
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="admin-table">
-              <thead>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-100 text-xs">
+              <thead className="bg-slate-50/50">
                 <tr>
-                  <th style={{ minWidth: '160px' }}>TIMESTAMP</th>
-                  <th>USUARIO</th>
-                  <th>OPERACIÓN</th>
-                  <th>TABLA</th>
-                  <th>IP</th>
-                  <th style={{ textAlign: 'center' }}>VALOR ANT.</th>
-                  <th style={{ textAlign: 'center' }}>VALOR NUEV.</th>
-                  <th style={{ textAlign: 'center' }}>METADATA</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Timestamp</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Operación</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Tabla</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">IP</th>
+                  <th className="px-6 py-3.5 text-center font-bold text-slate-400 uppercase tracking-wider">Valor Ant.</th>
+                  <th className="px-6 py-3.5 text-center font-bold text-slate-400 uppercase tracking-wider">Valor Nuev.</th>
+                  <th className="px-6 py-3.5 text-center font-bold text-slate-400 uppercase tracking-wider">Metadata</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-slate-100">
                 {logs.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--color-text-secondary)' }}>
+                    <td colSpan={8} className="text-center py-12 text-slate-400 font-semibold">
                       No existen registros para los parámetros seleccionados
                     </td>
                   </tr>
@@ -156,69 +149,64 @@ const LogAuditoria: React.FC = () => {
                     const formattedDate = date.toLocaleString('es-PE', { timeZone: 'America/Lima' });
 
                     return (
-                      <tr key={log.id_log}>
-                        <td className="admin-td-time" style={{ fontSize: '0.85rem' }}>{formattedDate}</td>
-                        <td className="admin-td-email" title={log.email_usuario || ''}>
+                      <tr key={log.id_log} className="hover:bg-slate-50/30 transition-colors">
+                        <td className="px-6 py-4 font-bold text-slate-600 font-mono">{formattedDate}</td>
+                        <td className="px-6 py-4 text-left font-semibold text-slate-700 max-w-[200px] truncate" title={log.email_usuario || ''}>
                           {log.email_usuario || '—'}
                         </td>
-                        <td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <OperacionBadge tipo={log.tipo_operacion} />
                         </td>
-                        <td>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
                           {log.tabla_afectada ? (
-                            <code style={{ fontSize: '0.8rem', backgroundColor: 'rgba(0,0,0,0.05)', padding: '0.125rem 0.25rem', borderRadius: '4px', fontFamily: 'monospace' }}>
+                            <code className="text-[10px] font-bold font-mono bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded">
                               {log.tabla_afectada}
                             </code>
                           ) : (
-                            '—'
+                            <span className="text-slate-400 font-semibold">—</span>
                           )}
                         </td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                          {log.ip_cliente || '—'}
-                        </td>
+                        <td className="px-6 py-4 font-semibold text-slate-500 font-mono">{log.ip_cliente || '—'}</td>
                         
-                        <td style={{ textAlign: 'center' }}>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
                           {log.valor_anterior ? (
                             <button
                               onClick={() => setSelectedJson({ title: 'Valor Anterior', data: log.valor_anterior })}
-                              className="btn btn-ghost btn-sm"
-                              style={{ padding: '0.25rem', borderRadius: '4px' }}
+                              className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition"
                               title="Ver valor anterior"
                             >
-                              <Eye size={16} style={{ color: 'var(--color-primary)' }} />
+                              <Eye size={16} />
                             </button>
                           ) : (
-                            <span style={{ color: 'var(--color-text-secondary)' }}>—</span>
+                            <span className="text-slate-400 font-semibold">—</span>
                           )}
                         </td>
 
-                        <td style={{ textAlign: 'center' }}>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
                           {log.valor_nuevo ? (
                             <button
                               onClick={() => setSelectedJson({ title: 'Valor Nuevo', data: log.valor_nuevo })}
-                              className="btn btn-ghost btn-sm"
-                              style={{ padding: '0.25rem', borderRadius: '4px' }}
+                              className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition"
                               title="Ver valor nuevo"
                             >
-                              <Eye size={16} style={{ color: 'var(--color-primary)' }} />
+                              <Eye size={16} />
                             </button>
                           ) : (
-                            <span style={{ color: 'var(--color-text-secondary)' }}>—</span>
+                            <span className="text-slate-400 font-semibold">—</span>
                           )}
                         </td>
 
-                        <td style={{ textAlign: 'center' }}>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
                           {log.metadata ? (
                             <button
                               onClick={() => setSelectedJson({ title: 'Metadata de Operación', data: log.metadata })}
-                              className="btn btn-ghost btn-sm"
-                              style={{ padding: '0.25rem', borderRadius: '4px' }}
+                              className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition"
                               title="Ver metadata"
                             >
-                              <Eye size={16} style={{ color: 'var(--color-primary)' }} />
+                              <Eye size={16} />
                             </button>
                           ) : (
-                            <span style={{ color: 'var(--color-text-secondary)' }}>—</span>
+                            <span className="text-slate-400 font-semibold">—</span>
                           )}
                         </td>
                       </tr>
@@ -232,88 +220,61 @@ const LogAuditoria: React.FC = () => {
 
         {/* Pagination */}
         {!loading && logs.length > 0 && (
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            padding: '1rem 1.5rem', 
-            borderTop: '1px solid var(--color-border)',
-            backgroundColor: 'rgba(0,0,0,0.01)'
-          }}>
-            <button
+          <div className="flex justify-between items-center px-6 py-4 border-t border-slate-100 bg-slate-50/50 text-xs font-semibold text-slate-500">
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className="btn btn-secondary btn-sm"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+              icon={<ChevronLeft size={16} />}
             >
-              <ChevronLeft size={16} />
-              <span>Anterior</span>
-            </button>
+              Anterior
+            </Button>
 
-            <span className="text-subtitle" style={{ fontSize: '0.875rem', color: 'var(--color-text-primary)' }}>
-              Página <strong>{page}</strong> de <strong>{totalPages}</strong> (Total: {total} eventos)
+            <span>
+              Página <strong className="text-slate-800 font-extrabold">{page}</strong> de <strong className="text-slate-800 font-extrabold">{totalPages}</strong> ({total} eventos)
             </span>
 
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page === totalPages}
-              className="btn btn-secondary btn-sm"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', opacity: page === totalPages ? 0.5 : 1, cursor: page === totalPages ? 'not-allowed' : 'pointer' }}
+              icon={<ChevronRight size={16} />}
             >
-              <span>Siguiente</span>
-              <ChevronRight size={16} />
-            </button>
+              Siguiente
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* JSON Modal */}
       {selectedJson && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 9999,
-          padding: '1.5rem'
-        }}>
-          <div className="card shadow-md" style={{
-            maxWidth: '600px',
-            width: '100%',
-            maxHeight: '85vh',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '1.5rem',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: 'var(--radius-lg)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-              <h3 className="text-h3" style={{ margin: 0, color: 'var(--color-text-primary)' }}>{selectedJson.title}</h3>
+        <div className="modal-overlay" onClick={() => setSelectedJson(null)}>
+          <div className="modal-box p-6 space-y-4 max-w-xl text-left" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-slate-800">{selectedJson.title}</h3>
               <button 
                 onClick={() => setSelectedJson(null)}
-                className="btn btn-ghost btn-sm"
-                style={{ fontSize: '1.5rem', padding: '0.25rem 0.5rem', cursor: 'pointer', lineHeight: 1 }}
+                className="text-slate-400 hover:text-slate-600 transition font-bold"
               >
-                &times;
+                ✕
               </button>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#1E1E1E', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
-              <pre style={{ margin: 0, color: '#A9DC76', fontFamily: 'monospace', fontSize: '0.85rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            
+            <div className="bg-slate-900 p-4 rounded-xl max-h-[50vh] overflow-y-auto border border-slate-950">
+              <pre className="text-xs font-mono text-emerald-400 whitespace-pre-wrap break-all leading-relaxed">
                 {JSON.stringify(selectedJson.data, null, 2)}
               </pre>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button 
+            
+            <div className="flex justify-end pt-3 border-t border-slate-100">
+              <Button 
+                variant="primary"
                 onClick={() => setSelectedJson(null)}
-                className="btn btn-primary"
               >
                 Cerrar
-              </button>
+              </Button>
             </div>
           </div>
         </div>

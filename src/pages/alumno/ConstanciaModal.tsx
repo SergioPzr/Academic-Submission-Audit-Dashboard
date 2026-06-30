@@ -39,82 +39,82 @@ const ConstanciaModal: React.FC<ConstanciaModalProps> = ({ isOpen, onClose, cons
   const isLate = constancia.estado_puntualidad === 'Tardía';
 
   return (
-    <div className="modal-overlay flex items-center justify-center fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}>
+    <div className="modal-overlay" onClick={onClose}>
       <div 
         id="printable-constancia"
-        className="bg-white w-full max-w-lg mx-4 rounded-xl shadow-lg border relative overflow-hidden"
+        className="modal-box max-w-lg overflow-hidden border-t-8 text-left"
         style={{ 
-          borderColor: isLate ? 'var(--color-warning)' : 'var(--color-success)',
-          borderTopWidth: '8px'
+          borderColor: isLate ? '#F59E0B' : '#16A34A',
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <CheckCircle2 size={28} className={isLate ? 'text-amber-500' : 'text-green-600'} />
+            <CheckCircle2 size={24} className={isLate ? 'text-amber-500' : 'text-emerald-600'} />
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Constancia de Entrega Digital</h3>
-              <p className="text-xs text-gray-500 font-mono">ID: {constancia.constancia_id || 'SIN_ID'}</p>
+              <h3 className="text-sm font-bold text-slate-800">Constancia de Entrega</h3>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {constancia.constancia_id || 'SIN_ID'}</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition duration-250 no-print"
+            className="text-slate-400 hover:text-slate-600 transition no-print"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          <div className="text-center pb-4 border-b border-dashed">
+          <div className="text-center pb-4 border-b border-dashed border-slate-200">
             <span 
-              className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2 ${
+              className={`inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider mb-2 border ${
                 isLate 
-                  ? 'bg-amber-100 text-amber-800 border border-amber-300' 
-                  : 'bg-green-100 text-green-800 border border-green-300'
+                  ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
               }`}
             >
               Entrega {constancia.estado_puntualidad}
             </span>
-            <p className="text-sm text-gray-600">
-              El entregable ha sido subido al repositorio institucional de Google Drive.
+            <p className="text-xs text-slate-500 font-medium">
+              El entregable ha sido subido de forma segura al repositorio institucional.
             </p>
           </div>
 
           {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+          <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-xs">
             <div>
-              <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Estudiante</span>
-              <span className="font-semibold text-gray-800">{perfil?.nombre_completo || 'Cargando...'}</span>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estudiante</span>
+              <span className="font-bold text-slate-700 mt-1 block">{perfil?.nombre_completo || 'Cargando...'}</span>
             </div>
             <div>
-              <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Código</span>
-              <span className="font-semibold text-gray-800 font-mono">{perfil?.codigo_institucional || 'N/A'}</span>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Código</span>
+              <span className="font-bold text-slate-700 font-mono mt-1 block">{perfil?.codigo_institucional || 'N/A'}</span>
             </div>
 
             <div className="col-span-2">
-              <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Curso</span>
-              <span className="font-semibold text-gray-800">{constancia.curso_nombre}</span>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Curso</span>
+              <span className="font-bold text-slate-700 mt-1 block">{constancia.curso_nombre}</span>
             </div>
 
             <div className="col-span-2">
-              <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Entregable</span>
-              <span className="font-semibold text-gray-800">{constancia.entregable_titulo}</span>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Entregable</span>
+              <span className="font-bold text-slate-700 mt-1 block">{constancia.entregable_titulo}</span>
             </div>
 
             <div>
-              <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha y Hora (PET)</span>
-              <span className="font-semibold text-gray-800">{formatInLimaTimezone(constancia.timestamp_servidor)}</span>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha y Hora</span>
+              <span className="font-bold text-slate-700 mt-1 block">{formatInLimaTimezone(constancia.timestamp_servidor)}</span>
             </div>
             <div>
-              <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Tamaño</span>
-              <span className="font-semibold text-gray-800">{formatBytes(constancia.tamano_bytes)}</span>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tamaño</span>
+              <span className="font-bold text-slate-700 mt-1 block">{formatBytes(constancia.tamano_bytes)}</span>
             </div>
 
-            <div className="col-span-2 bg-gray-50 p-3 rounded-lg border">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="col-span-2 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <FileText size={14} /> Archivo Subido
                 </span>
                 {constancia.drive_url && (
@@ -122,44 +122,45 @@ const ConstanciaModal: React.FC<ConstanciaModalProps> = ({ isOpen, onClose, cons
                     href={constancia.drive_url} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-xs font-medium text-emerald-700 hover:text-emerald-950 flex items-center gap-1 no-print"
+                    className="text-[10px] font-bold text-emerald-700 hover:underline flex items-center gap-1 no-print"
                   >
-                    <Download size={12} /> Ver en Drive
+                    <Download size={12} /> Descargar Archivo
                   </a>
                 )}
               </div>
-              <span className="block font-semibold text-gray-800 truncate">{constancia.nombre_archivo}</span>
+              <span className="block font-bold text-slate-800 truncate">{constancia.nombre_archivo}</span>
             </div>
 
-            <div className="col-span-2 bg-slate-50 p-3 rounded-lg border font-mono text-xs">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Firma Digital (SHA-256)</span>
+            <div className="col-span-2 bg-slate-50 p-3.5 rounded-xl border border-slate-100 font-mono text-[10px]">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Firma Digital (SHA-256)</span>
                 <button 
                   onClick={handleCopyHash} 
-                  className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200 transition duration-250 flex items-center gap-1 no-print"
+                  className="text-slate-400 hover:text-slate-600 flex items-center gap-1 no-print font-bold"
                   title="Copiar firma"
                 >
-                  {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                  {copied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                   <span>{copied ? 'Copiado' : 'Copiar'}</span>
                 </button>
               </div>
-              <span className="block text-slate-700 break-all bg-white p-2 border rounded mt-1 font-semibold">{constancia.file_hash}</span>
+              <span className="block text-slate-600 break-all bg-white p-2.5 border border-slate-200/50 rounded-lg mt-1 font-semibold">{constancia.file_hash}</span>
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 border-t bg-gray-50 flex justify-end gap-3 no-print">
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 no-print">
           <Button 
             variant="secondary" 
+            size="sm"
             onClick={handlePrint}
-            className="flex items-center gap-2"
+            icon={<Printer size={14} />}
           >
-            <Printer size={18} />
-            <span>Imprimir</span>
+            Imprimir
           </Button>
           <Button 
             variant="primary" 
+            size="sm"
             onClick={onClose}
           >
             Aceptar

@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import Spinner from '../../components/ui/Spinner';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
 import { getMisCursos } from '../../services/cursosService';
 import type { CursoConStats } from '../../services/cursosService';
 import { getEntregablesPorCurso, getAlumnosPorCurso } from '../../services/entregablesService';
@@ -173,7 +174,6 @@ const MonitorVivo: React.FC = () => {
       return;
     }
 
-    // Subscribe
     const channel = supabase
       .channel(`monitor-entregas-${entregableId}`)
       .on(
@@ -233,7 +233,6 @@ const MonitorVivo: React.FC = () => {
     setIsActive(!isActive);
   };
 
-  // Helper for relative time
   const getRelativeTime = (isoString: string): string => {
     const diff = new Date().getTime() - new Date(isoString).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -253,7 +252,6 @@ const MonitorVivo: React.FC = () => {
     return formatInLimaTimezone(isoString, 'time');
   };
 
-  // Statistics calculation
   const totalSubmissions = submissions.length;
   const aTiempo = submissions.filter(s => s.estado_puntualidad === 'A Tiempo').length;
   const tardias = submissions.filter(s => s.estado_puntualidad === 'Tardía').length;
@@ -262,36 +260,39 @@ const MonitorVivo: React.FC = () => {
   const currentDeliverableObj = entregables.find(e => e.id_entregable === entregableId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left animate-fade-in">
       {/* Back button and selectors */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-5">
         <div className="flex items-center space-x-3">
           <button
             onClick={() => navigate('/profesor')}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition"
             title="Volver"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              Monitor en Vivo
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive ? 'bg-emerald-100 text-emerald-800 animate-pulse' : 'bg-gray-100 text-gray-800'}`}>
-                ● {isActive ? 'EN VIVO' : 'PAUSADO'}
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2.5">
+              <span>Monitor en Vivo</span>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                isActive ? 'bg-emerald-50 text-emerald-700 animate-pulse border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {isActive ? 'EN VIVO' : 'PAUSADO'}
               </span>
             </h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-xs text-slate-400 font-medium mt-0.5">
               {isActive ? 'Auto-actualiza en tiempo real' : 'Actualización en tiempo real pausada'}
             </p>
           </div>
         </div>
 
         {/* Dropdown Selectors */}
-        <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Curso</span>
+        <div className="flex flex-wrap gap-3 items-end w-full md:w-auto">
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Curso</span>
             <select
-              className="input-field py-1 px-3 bg-white text-sm"
+              className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-bold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
               value={cursoId}
               onChange={(e) => {
                 setCursoId(e.target.value);
@@ -306,10 +307,10 @@ const MonitorVivo: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Entregable</span>
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Entregable</span>
             <select
-              className="input-field py-1 px-3 bg-white text-sm min-w-[150px]"
+              className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-bold focus:outline-none focus:border-emerald-500 transition cursor-pointer min-w-[150px]"
               value={entregableId}
               onChange={(e) => setEntregableId(e.target.value)}
               disabled={entregables.length === 0}
@@ -326,40 +327,37 @@ const MonitorVivo: React.FC = () => {
             </select>
           </div>
 
-          <button
+          <Button
             onClick={handleToggleActive}
-            className={`btn px-3 py-1.5 flex items-center justify-center text-sm font-semibold rounded mt-4 md:mt-0 ${
-              isActive
-                ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-            }`}
+            variant={isActive ? 'secondary' : 'primary'}
+            size="sm"
             disabled={!entregableId}
+            icon={isActive ? <Pause size={14} /> : <Play size={14} />}
           >
-            {isActive ? <Pause size={16} className="mr-1.5" /> : <Play size={16} className="mr-1.5" />}
             {isActive ? 'Pausar' : 'Reanudar'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Subheader Information */}
       {currentCourseObj && currentDeliverableObj && (
-        <div className="bg-emerald-900 text-white p-4 rounded-xl shadow-inner flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div className="bg-emerald-950 text-white p-5 rounded-2xl shadow-sm border border-emerald-900 flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-left">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-200">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
               Curso Activo
             </span>
-            <h3 className="text-lg font-bold">
+            <h3 className="text-base font-bold mt-1">
               {currentCourseObj.nombre} <span className="text-emerald-300">({currentCourseObj.codigo} · Sec {currentCourseObj.seccion})</span>
             </h3>
-            <p className="text-sm text-emerald-100 mt-1">
+            <p className="text-xs text-emerald-200 mt-1">
               <strong>Ventana:</strong> {currentDeliverableObj.titulo}
             </p>
           </div>
-          <div className="text-right sm:border-l sm:border-emerald-800 sm:pl-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-200 block">
+          <div className="sm:text-right sm:border-l sm:border-emerald-800/80 sm:pl-6">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
               Fecha de Cierre (Lima)
             </span>
-            <span className="text-sm font-semibold block mt-1">
+            <span className="text-xs font-bold block mt-1.5">
               {formatInLimaTimezone(currentDeliverableObj.fecha_cierre, 'full')}
             </span>
           </div>
@@ -368,91 +366,93 @@ const MonitorVivo: React.FC = () => {
 
       {/* KPIs Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-white p-4 border border-gray-100 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-            <Clock size={24} />
+        <Card className="p-4 flex items-center space-x-4">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+            <Clock size={20} />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Entregas en Sesión</p>
-            <p className="text-2xl font-bold text-gray-900">{totalSubmissions}</p>
-          </div>
-        </Card>
-        <Card className="bg-white p-4 border border-gray-100 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
-            <CheckCircle2 size={24} />
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">A Tiempo</p>
-            <p className="text-2xl font-bold text-gray-900 text-emerald-600">{aTiempo}</p>
+          <div className="text-left">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Entregas en Sesión</p>
+            <p className="text-2xl font-extrabold text-slate-800 mt-0.5">{totalSubmissions}</p>
           </div>
         </Card>
-        <Card className="bg-white p-4 border border-gray-100 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-lg">
-            <AlertTriangle size={24} />
+        
+        <Card className="p-4 flex items-center space-x-4">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+            <CheckCircle2 size={20} />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Tardías</p>
-            <p className="text-2xl font-bold text-gray-900 text-amber-600">{tardias}</p>
+          <div className="text-left">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">A Tiempo</p>
+            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">{aTiempo}</p>
+          </div>
+        </Card>
+
+        <Card className="p-4 flex items-center space-x-4">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
+            <AlertTriangle size={20} />
+          </div>
+          <div className="text-left">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tardías</p>
+            <p className="text-2xl font-extrabold text-amber-700 mt-0.5">{tardias}</p>
           </div>
         </Card>
       </div>
 
       {/* Main Table Panel */}
-      <Card className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-          <h4 className="font-bold text-gray-800">Historial de cargas en tiempo real</h4>
+      <Card className="overflow-hidden border border-slate-100 shadow-sm">
+        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Historial de cargas en tiempo real</h4>
           <button
             onClick={loadSubmissions}
-            className="p-1 rounded hover:bg-gray-200 text-gray-500 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
             title="Refrescar"
             disabled={loading}
           >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
 
         {loading && submissions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 space-y-3">
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Spinner size="lg" />
-            <p className="text-sm text-gray-500">Cargando monitor de entregas...</p>
+            <p className="text-xs text-slate-400 font-bold">Cargando monitor de entregas...</p>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center p-12 text-red-500 space-y-2">
-            <AlertCircle size={36} />
-            <p className="font-medium">{error}</p>
+          <div className="flex flex-col items-center justify-center py-16 text-red-600 gap-2">
+            <AlertCircle size={32} />
+            <p className="text-xs font-bold">{error}</p>
           </div>
         ) : submissions.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
-              <thead className="bg-gray-50/50">
+            <table className="min-w-full divide-y divide-slate-100 text-xs">
+              <thead className="bg-slate-50/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Hora</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Código</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Alumno</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Archivo</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Acción</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Hora</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Código</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Alumno</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Archivo</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Acción</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
+              <tbody className="bg-white divide-y divide-slate-100">
                 {submissions.map((sub) => (
-                  <tr key={sub.id_entrega} className="hover:bg-gray-50/50 transition-colors animate-fade-in">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className="font-semibold text-gray-800">{formatTimeOnly(sub.timestamp_servidor)}</span>
-                      <span className="text-[10px] text-gray-400 block mt-0.5">{getRelativeTime(sub.timestamp_servidor)}</span>
+                  <tr key={sub.id_entrega} className="hover:bg-slate-50/30 transition animate-fade-in">
+                    <td className="px-6 py-4 whitespace-nowrap text-left">
+                      <span className="font-bold text-slate-800 font-mono block">{formatTimeOnly(sub.timestamp_servidor)}</span>
+                      <span className="text-[10px] text-slate-400 font-semibold mt-0.5 block">{getRelativeTime(sub.timestamp_servidor)}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-700 font-mono">
                       {sub.alumno_codigo}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800 text-left">
                       {sub.alumno_nombre}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title={sub.nombre_archivo}>
+                    <td className="px-6 py-4 whitespace-nowrap text-left max-w-xs truncate" title={sub.nombre_archivo}>
                       <a
                         href={sub.drive_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-emerald-600 hover:text-emerald-700 font-semibold underline flex items-center"
+                        className="text-emerald-600 hover:text-emerald-700 font-bold underline"
                       >
                         {sub.nombre_archivo}
                       </a>
@@ -463,14 +463,14 @@ const MonitorVivo: React.FC = () => {
                         label={sub.estado_puntualidad}
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap font-bold">
                       <button
                         onClick={() => {
                           sessionStorage.setItem('calificacion_curso_id', cursoId);
                           sessionStorage.setItem('calificacion_entregable_id', entregableId);
                           navigate('/profesor/calificacion');
                         }}
-                        className="text-primary hover:text-primary-dark font-bold underline"
+                        className="text-emerald-700 hover:text-emerald-800 underline"
                       >
                         Calificar
                       </button>
@@ -481,10 +481,10 @@ const MonitorVivo: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center space-y-3">
-            <Clock size={40} className="text-gray-300" />
-            <p className="font-medium text-gray-500">Aún no se han recibido entregas</p>
-            <p className="text-xs max-w-sm text-gray-400">
+          <div className="py-20 text-center text-slate-450 flex flex-col items-center justify-center space-y-3">
+            <Clock size={36} className="text-slate-300" />
+            <p className="text-sm font-bold text-slate-600">Aún no se han recibido entregas</p>
+            <p className="text-xs max-w-sm text-slate-400 font-medium leading-relaxed">
               Las entregas que realicen los alumnos matriculados aparecerán aquí de forma instantánea.
             </p>
           </div>

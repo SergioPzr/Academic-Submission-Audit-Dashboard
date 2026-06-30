@@ -80,7 +80,6 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
     setError(null);
 
     try {
-      // 1. Verify window is open on the server first (as extra client-side check)
       const serverTime = await getServerTime();
       const deadlineTime = new Date(entregable.fecha_cierre_efectiva).getTime();
       
@@ -88,7 +87,6 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
         throw new Error('El plazo de entrega para este entregable ha expirado y no se admiten entregas extemporáneas.');
       }
 
-      // 2. Upload file via service (invokes upload-delivery Edge Function)
       const response = await subirEntrega(file, entregable.id_entregable, entregable.id_curso);
       
       if (response && response.success) {
@@ -107,40 +105,43 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
   };
 
   return (
-    <div className="modal-overlay flex items-center justify-center fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}>
-      <div className="bg-white w-full max-w-lg mx-4 rounded-xl shadow-lg border relative overflow-hidden">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box max-w-lg" onClick={(e) => e.stopPropagation()}>
+        
         {/* Header */}
-        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 text-left">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Entregar Trabajo</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{entregable.curso_codigo} - {entregable.curso_nombre}</p>
+            <h3 className="text-base font-bold text-slate-800">Entregar Trabajo</h3>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">{entregable.curso_codigo} - {entregable.curso_nombre}</p>
           </div>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition duration-250"
+            className="text-slate-400 hover:text-slate-600 transition"
             disabled={uploading}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 text-left">
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-gray-500 uppercase">Actividad</label>
-            <span className="block text-base font-bold text-gray-800">{entregable.titulo}</span>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Actividad</label>
+            <span className="block text-sm font-bold text-slate-800">{entregable.titulo}</span>
             {entregable.descripcion && (
-              <p className="text-sm text-gray-600 bg-gray-50 p-2 border rounded">{entregable.descripcion}</p>
+              <p className="text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 p-3 rounded-xl mt-2">
+                {entregable.descripcion}
+              </p>
             )}
           </div>
 
           {/* Drag & drop zone */}
           {!file ? (
             <div
-              className={`border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer transition-all duration-250 ${
+              className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${
                 dragActive 
-                  ? 'border-emerald-500 bg-emerald-50' 
-                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                  ? 'border-emerald-500 bg-emerald-50/50' 
+                  : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50'
               }`}
               onDragEnter={handleDrag}
               onDragOver={handleDrag}
@@ -154,35 +155,35 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
               />
-              <Upload size={36} className={`mb-3 ${dragActive ? 'text-emerald-500' : 'text-gray-400'}`} />
-              <p className="text-sm font-semibold text-gray-700 text-center">
+              <Upload size={32} className={`mb-3 transition ${dragActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+              <p className="text-xs font-bold text-slate-700 text-center">
                 Arrastra tu archivo aquí o <span className="text-emerald-700 hover:underline">haz clic para explorar</span>
               </p>
-              <p className="text-xs text-gray-400 mt-1.5 text-center">
-                Formatos soportados: Documentos (PDF, DOCX, XLSX), Código (.py, .java, etc.), Imágenes (PNG, JPG) y ZIP/RAR
+              <p className="text-[10px] text-slate-400 mt-2 text-center leading-relaxed">
+                Formatos soportados: PDF, DOCX, XLSX, imágenes, ZIP/RAR
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-[10px] text-slate-400 mt-0.5 text-center">
                 Límite de tamaño: {formatBytes(MAX_FILE_SIZE)}
               </p>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
               <div className="flex items-center gap-3 truncate">
-                <div className="bg-emerald-100 p-2 rounded-lg text-emerald-800">
-                  <File size={24} />
+                <div className="bg-emerald-100/50 p-2 rounded-xl text-emerald-800">
+                  <File size={22} />
                 </div>
-                <div className="truncate">
-                  <p className="text-sm font-semibold text-gray-800 truncate">{file.name}</p>
-                  <p className="text-xs text-gray-500">{formatBytes(file.size)}</p>
+                <div className="truncate text-left">
+                  <p className="text-xs font-bold text-slate-800 truncate">{file.name}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold">{formatBytes(file.size)}</p>
                 </div>
               </div>
               {!uploading && (
                 <button 
                   type="button"
                   onClick={handleRemoveFile} 
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-emerald-100 transition duration-200"
+                  className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-emerald-100/50 transition"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               )}
             </div>
@@ -190,14 +191,14 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
-              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs font-semibold leading-relaxed">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Footer Actions */}
-          <div className="border-t pt-4 flex justify-end gap-3 bg-white">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <Button
               type="button"
               variant="secondary"
@@ -214,7 +215,7 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
             >
               {uploading ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 size={14} className="animate-spin" />
                   <span>Subiendo...</span>
                 </>
               ) : (

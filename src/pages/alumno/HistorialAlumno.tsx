@@ -73,7 +73,6 @@ const HistorialAlumno: React.FC = () => {
       ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
     ].join('\n');
 
-    // Create a Blob with UTF-8 BOM to properly support special characters in Excel
     const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -121,17 +120,18 @@ const HistorialAlumno: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in text-left">
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Historial de Entregas</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Consulta y descarga todos tus comprobantes y revisiones</p>
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Historial de Entregas</h2>
+          <p className="text-xs text-slate-400 font-medium mt-1">Consulta y descarga todos tus comprobantes y revisiones</p>
         </div>
         
         {historial.length > 0 && (
           <Button 
             variant="secondary"
+            size="sm"
             className="flex items-center gap-2 text-xs font-semibold"
             onClick={handleExportCSV}
           >
@@ -147,105 +147,103 @@ const HistorialAlumno: React.FC = () => {
           description="Aún no has realizado ninguna entrega en la plataforma."
         />
       ) : (
-        <Card className="overflow-hidden border border-gray-200">
+        <Card className="overflow-hidden border border-slate-150 rounded-2xl">
           {/* Table Toolbar */}
-          <div className="p-4 bg-gray-50 border-b flex flex-col sm:flex-row items-center gap-3">
+          <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex flex-col sm:flex-row items-center gap-3">
             <div className="relative w-full max-w-sm">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar por archivo, curso o actividad..."
-                className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="text-xs text-gray-500 ml-auto font-medium">
+            <div className="text-xs text-slate-400 ml-auto font-bold">
               Mostrando {filteredHistorial.length} de {historial.length} registros
             </div>
           </div>
 
           {/* Table Container */}
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-sm text-gray-700">
-              <thead>
-                <tr className="bg-gray-150 border-b font-semibold text-gray-600">
-                  <th className="p-4">Archivo / Actividad</th>
-                  <th className="p-4">Curso</th>
-                  <th className="p-4">Tamaño</th>
-                  <th className="p-4">Fecha de Envío</th>
-                  <th className="p-4">Estado</th>
-                  <th className="p-4">Calificación</th>
-                  <th className="p-4 text-center">Acciones</th>
+            <table className="w-full border-collapse text-left text-xs text-slate-700">
+              <thead className="bg-slate-50/50 border-b border-slate-100">
+                <tr className="font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="px-6 py-4">Archivo / Actividad</th>
+                  <th className="px-6 py-4">Curso</th>
+                  <th className="px-6 py-4">Tamaño</th>
+                  <th className="px-6 py-4">Fecha de Envío</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4">Calificación</th>
+                  <th className="px-6 py-4 text-center">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {filteredHistorial.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-gray-500">
+                    <td colSpan={7} className="p-8 text-center text-slate-400 font-semibold">
                       No se encontraron entregas que coincidan con la búsqueda.
                     </td>
                   </tr>
                 ) : (
                   filteredHistorial.map((item) => (
-                    <tr key={item.id_entrega} className="hover:bg-gray-50 transition">
-                      <td className="p-4">
-                        <div className="max-w-xs md:max-w-sm">
-                          <p className="font-semibold text-gray-900 truncate" title={item.nombre_archivo}>
+                    <tr key={item.id_entrega} className="hover:bg-slate-50/30 transition">
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs md:max-w-sm text-left">
+                          <p className="font-bold text-slate-800 truncate" title={item.nombre_archivo}>
                             {item.nombre_archivo}
                           </p>
-                          <p className="text-xs text-gray-400 font-medium truncate mt-0.5">
+                          <p className="text-[10px] text-slate-400 font-semibold truncate mt-0.5">
                             Actividad: {item.entregable_titulo}
                           </p>
                         </div>
                       </td>
-                      <td className="p-4">
-                        <div>
-                          <p className="font-bold text-gray-800">{item.curso_codigo}</p>
-                          <p className="text-xs text-gray-500 truncate mt-0.5 max-w-[150px]">{item.curso_nombre}</p>
+                      <td className="px-6 py-4">
+                        <div className="text-left">
+                          <p className="font-bold text-slate-700 font-mono">{item.curso_codigo}</p>
+                          <p className="text-[10px] text-slate-400 font-semibold truncate mt-0.5 max-w-[150px]">{item.curso_nombre}</p>
                         </div>
                       </td>
-                      <td className="p-4 font-medium text-gray-600">
+                      <td className="px-6 py-4 font-semibold text-slate-500">
                         {formatBytes(item.tamano_bytes)}
                       </td>
-                      <td className="p-4 text-gray-500 whitespace-nowrap">
+                      <td className="px-6 py-4 text-slate-500 font-medium whitespace-nowrap">
                         {formatInLimaTimezone(item.timestamp_servidor)}
                       </td>
-                      <td className="p-4">
+                      <td className="px-6 py-4">
                         <Badge 
                           variant={item.estado_puntualidad === 'A Tiempo' ? 'success' : 'warning'}
                           label={item.estado_puntualidad}
                         />
                       </td>
-                      <td className="p-4">
+                      <td className="px-6 py-4">
                         {item.revision ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                              {item.revision.nota !== null ? String(item.revision.nota).padStart(2, '0') : 'NE'}
-                            </span>
-                          </div>
+                          <span className="font-mono font-bold text-purple-800 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200/50">
+                            {item.revision.nota !== null ? String(item.revision.nota.toFixed(1)).padStart(4, '0') : 'NE'}
+                          </span>
                         ) : (
-                          <span className="text-xs text-gray-400 italic">Pendiente</span>
+                          <span className="text-[10px] text-slate-400 font-bold italic">Pendiente</span>
                         )}
                       </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => handleVerConstancia(item)}
-                            className="p-1.5 text-gray-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition duration-200"
+                            className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
                             title="Ver Constancia Digital"
                           >
-                            <FileText size={18} />
+                            <FileText size={16} />
                           </button>
                           {item.drive_url && (
                             <a 
                               href={item.drive_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200"
-                              title="Ver archivo original en Drive"
+                              className="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition"
+                              title="Descargar archivo original"
                             >
-                              <Eye size={18} />
+                              <Eye size={16} />
                             </a>
                           )}
                         </div>

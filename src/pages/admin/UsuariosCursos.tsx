@@ -3,6 +3,7 @@ import { Users, BookOpen, Plus, Search, RefreshCw, ToggleLeft, ToggleRight } fro
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
+import Card from '../../components/ui/Card';
 import ListaUsuarios from './ListaUsuarios';
 import FormCrearUsuario from './FormCrearUsuario';
 import FormCrearCurso from './FormCrearCurso';
@@ -65,14 +66,14 @@ const UsuariosCursos: React.FC = () => {
   );
 
   return (
-    <div className="admin-panel">
+    <div className="space-y-6 text-left animate-fade-in">
       {/* Header */}
-      <div className="admin-panel-header">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-h2">Usuarios &amp; Cursos</h2>
-          <p className="text-subtitle">Gestión de cuentas, cursos y matrículas masivas</p>
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Usuarios &amp; Cursos</h2>
+          <p className="text-xs text-slate-400 font-medium mt-1">Gestión de cuentas, cursos y matrículas masivas</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="flex gap-2">
           {activeTab === 'usuarios' && (
             <Button
               variant="primary"
@@ -97,35 +98,47 @@ const UsuariosCursos: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="tab-nav">
+      <div className="flex gap-1 border-b border-slate-100 pb-px">
         <button
           id="tab-usuarios"
-          className={`tab-btn${activeTab === 'usuarios' ? ' tab-btn-active' : ''}`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all duration-200 ${
+            activeTab === 'usuarios'
+              ? 'border-emerald-600 text-emerald-700 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
           onClick={() => setActiveTab('usuarios')}
         >
-          <Users size={15} />
+          <Users size={14} />
           Usuarios
         </button>
         <button
           id="tab-cursos"
-          className={`tab-btn${activeTab === 'cursos' ? ' tab-btn-active' : ''}`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all duration-200 ${
+            activeTab === 'cursos'
+              ? 'border-emerald-600 text-emerald-700 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
           onClick={() => setActiveTab('cursos')}
         >
-          <BookOpen size={15} />
+          <BookOpen size={14} />
           Cursos
         </button>
         <button
           id="tab-matricula"
-          className={`tab-btn${activeTab === 'matricula' ? ' tab-btn-active' : ''}`}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all duration-200 ${
+            activeTab === 'matricula'
+              ? 'border-emerald-600 text-emerald-700 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
           onClick={() => setActiveTab('matricula')}
         >
-          <Plus size={15} />
+          <Plus size={14} />
           Matrícula Masiva (CSV)
         </button>
       </div>
 
       {/* Tab content */}
-      <div className="tab-content">
+      <div className="min-h-[300px]">
         {/* Tab: Usuarios */}
         {activeTab === 'usuarios' && (
           <ListaUsuarios key={refreshKey} onRefresh={() => setRefreshKey((k) => k + 1)} />
@@ -133,75 +146,79 @@ const UsuariosCursos: React.FC = () => {
 
         {/* Tab: Cursos */}
         {activeTab === 'cursos' && (
-          <div className="lista-usuarios">
-            <div className="lista-usuarios-toolbar">
-              <div className="search-wrapper">
-                <Search size={16} className="search-icon" />
+          <Card className="p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <div className="relative w-full sm:flex-1">
+                <Search size={16} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
                 <input
                   id="busqueda-curso"
                   type="text"
                   placeholder="Buscar por nombre, código o sección…"
-                  className="search-input"
+                  className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition"
                   value={cursoBusqueda}
                   onChange={(e) => setCursoBusqueda(e.target.value)}
                 />
               </div>
-              <button
-                className="btn btn-ghost btn-sm"
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full sm:w-auto"
                 onClick={fetchCursos}
                 disabled={loadingCursos}
-                title="Refrescar"
               >
-                <RefreshCw size={14} className={loadingCursos ? 'spin-icon' : ''} />
-              </button>
+                <RefreshCw size={14} className={loadingCursos ? 'animate-spin' : ''} />
+              </Button>
             </div>
 
             {loadingCursos ? (
-              <div className="admin-loading-center">
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
                 <Spinner size="md" />
+                <p className="text-xs text-slate-400 font-bold">Cargando cursos...</p>
               </div>
             ) : (
-              <>
-                <p className="text-subtitle" style={{ marginBottom: '0.75rem' }}>
+              <div className="space-y-4">
+                <p className="text-xs text-slate-400 font-semibold">
                   {cursosFiltrados.length} curso{cursosFiltrados.length !== 1 ? 's' : ''} encontrado{cursosFiltrados.length !== 1 ? 's' : ''}
                 </p>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="admin-table">
-                    <thead>
+                <div className="overflow-x-auto border border-slate-100 rounded-xl">
+                  <table className="min-w-full divide-y divide-slate-100 text-xs">
+                    <thead className="bg-slate-50/50">
                       <tr>
-                        <th>CÓDIGO</th>
-                        <th>NOMBRE</th>
-                        <th>SECCIÓN</th>
-                        <th>CICLO</th>
-                        <th>DOCENTE</th>
-                        <th>ESTADO</th>
-                        <th>ACCIÓN</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Código</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Nombre</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Sección</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Ciclo</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Docente</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                        <th className="px-6 py-3.5 text-left font-bold text-slate-400 uppercase tracking-wider">Acción</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="bg-white divide-y divide-slate-100">
                       {cursosFiltrados.length === 0 ? (
                         <tr>
-                          <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
+                          <td colSpan={7} className="text-center py-10 text-slate-400 font-semibold">
                             No se encontraron cursos
                           </td>
                         </tr>
                       ) : (
                         cursosFiltrados.map((c) => (
-                          <tr key={c.id_curso}>
-                            <td className="admin-td-mono">{c.codigo}</td>
-                            <td style={{ fontWeight: 500 }}>{c.nombre}</td>
-                            <td className="admin-td-mono">{c.seccion}</td>
-                            <td>{c.ciclo_academico}</td>
-                            <td>{c.usuarios?.nombre_completo ?? <span className="text-subtitle">Sin asignar</span>}</td>
-                            <td>
+                          <tr key={c.id_curso} className="hover:bg-slate-50/30 transition-colors">
+                            <td className="px-6 py-4 font-bold text-slate-700 font-mono">{c.codigo}</td>
+                            <td className="px-6 py-4 font-semibold text-slate-800 text-left">{c.nombre}</td>
+                            <td className="px-6 py-4 font-bold text-slate-700 font-mono">{c.seccion}</td>
+                            <td className="px-6 py-4 text-slate-600 font-medium">{c.ciclo_academico}</td>
+                            <td className="px-6 py-4 text-slate-600 font-medium text-left">
+                              {c.usuarios?.nombre_completo ?? <span className="text-slate-400 italic">Sin asignar</span>}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
                               <Badge
                                 label={c.estado}
                                 variant={c.estado === 'activo' ? 'success' : 'error'}
                               />
                             </td>
-                            <td>
+                            <td className="px-6 py-4 whitespace-nowrap">
                               <button
-                                className="btn btn-ghost btn-sm"
+                                className="text-slate-400 hover:text-slate-600 disabled:opacity-50 transition"
                                 disabled={actionLoading === c.id_curso}
                                 onClick={() => handleToggleCurso(c)}
                                 title={c.estado === 'activo' ? 'Desactivar curso' : 'Activar curso'}
@@ -209,9 +226,9 @@ const UsuariosCursos: React.FC = () => {
                                 {actionLoading === c.id_curso ? (
                                   <Spinner size="sm" />
                                 ) : c.estado === 'activo' ? (
-                                  <ToggleRight size={18} color="var(--color-success)" />
+                                  <ToggleRight size={22} className="text-emerald-600" />
                                 ) : (
-                                  <ToggleLeft size={18} color="var(--color-text-secondary)" />
+                                  <ToggleLeft size={22} className="text-slate-400" />
                                 )}
                               </button>
                             </td>
@@ -221,9 +238,9 @@ const UsuariosCursos: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
-              </>
+              </div>
             )}
-          </div>
+          </Card>
         )}
 
         {/* Tab: Matrícula Masiva */}

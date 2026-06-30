@@ -70,25 +70,28 @@ const FormCrearCurso: React.FC<FormCrearCursoProps> = ({ onClose, onCreated }) =
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="modal-icon-badge">
-              <BookPlus size={18} color="var(--color-accent)" />
+      <div className="modal-box max-w-lg" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Header */}
+        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100">
+              <BookPlus size={18} className="text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-h3">Crear Curso</h3>
-              <p className="text-subtitle">Registrar nuevo curso en el sistema</p>
+              <h3 className="text-base font-bold text-slate-800">Crear Curso</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Registrar nuevo curso en el sistema</p>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm modal-close-btn" onClick={onClose}>
+          <button className="text-slate-400 hover:text-slate-600 transition" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="modal-body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+        <form onSubmit={handleSubmit} noValidate className="text-left">
+          <div className="p-6 space-y-4">
+            
+            <div className="grid grid-cols-2 gap-4">
               <Input
                 id="curso-codigo"
                 label="Código del curso *"
@@ -125,13 +128,13 @@ const FormCrearCurso: React.FC<FormCrearCursoProps> = ({ onClose, onCreated }) =
               error={errors.ciclo_academico}
             />
 
-            <div className="input-group">
-              <label className="input-label" htmlFor="curso-profesor">
+            <div className="flex flex-col w-full">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block" htmlFor="curso-profesor">
                 Docente asignado (opcional)
               </label>
               <select
                 id="curso-profesor"
-                className="input-field"
+                className="bg-white border border-slate-200 rounded-xl py-2.5 px-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 cursor-pointer"
                 value={form.id_profesor}
                 onChange={(e) => handleChange('id_profesor', e.target.value)}
               >
@@ -146,17 +149,17 @@ const FormCrearCurso: React.FC<FormCrearCursoProps> = ({ onClose, onCreated }) =
           </div>
 
           {submitError && (
-            <div className="admin-error-banner" style={{ margin: '0 1.5rem 1rem' }}>
-              <span style={{ fontSize: '0.8125rem' }}>{submitError}</span>
+            <div className="mx-6 mb-4 p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex items-center gap-2 text-xs font-semibold">
+              <span>{submitError}</span>
             </div>
           )}
 
-          <div className="modal-footer">
+          <div className="flex justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-2xl">
             <Button variant="secondary" type="button" onClick={onClose}>
               Cancelar
             </Button>
             <Button variant="primary" type="submit" loading={loading} icon={<BookPlus size={14} />}>
-              {loading ? 'Guardando…' : 'Crear curso'}
+              Crear curso
             </Button>
           </div>
         </form>

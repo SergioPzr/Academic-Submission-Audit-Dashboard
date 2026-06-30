@@ -20,24 +20,27 @@ const StatCard: React.FC<StatCardProps> = ({
   className = '',
 }) => {
   return (
-    <Card className={`stat-card ${className}`}>
-      <div className="stat-card-info">
-        <span className="stat-card-label">{label}</span>
-        <span className="stat-card-value">{value}</span>
+    <Card className={`p-5 flex items-start justify-between gap-4 ${className}`}>
+      <div className="flex flex-col gap-1 text-left">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</span>
+        <span className="text-2xl font-extrabold text-slate-800 tabular-nums">{value}</span>
         {trend && (
           <span
-            className={`stat-card-trend ${
-              trend.isUpward ? 'stat-card-trend-up' : 'stat-card-trend-down'
+            className={`text-xs font-semibold flex items-center gap-1 ${
+              trend.isUpward ? 'text-emerald-600' : 'text-red-500'
             }`}
           >
             {trend.isUpward ? '↑' : '↓'} {trend.value}
           </span>
         )}
       </div>
-      {icon && <div className="stat-card-icon">{icon}</div>}
+      {icon && (
+        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
+          {icon}
+        </div>
+      )}
     </Card>
   );
 };
 
 export default StatCard;
-// 

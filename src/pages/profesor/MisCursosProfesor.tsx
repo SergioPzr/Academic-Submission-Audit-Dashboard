@@ -8,6 +8,7 @@ import ModalCrearEntregable from './ModalCrearEntregable';
 import { getMisCursos, getKPIsProfesor } from '../../services/cursosService';
 import type { CursoConStats, ProfesorKPIs } from '../../services/cursosService';
 import { BookOpen, Users, ClipboardCheck, AlertTriangle, Plus } from 'lucide-react';
+import Button from '../../components/ui/Button';
 
 const MisCursosProfesor: React.FC = () => {
   const { perfil } = useAuth();
@@ -56,14 +57,13 @@ const MisCursosProfesor: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div className="flex h-64 items-center justify-center gap-3">
         <Spinner size="lg" />
-        <span className="ml-3 text-gray-500 font-medium">Cargando cursos y estadísticas...</span>
+        <span className="text-xs text-slate-400 font-bold">Cargando cursos y estadísticas...</span>
       </div>
     );
   }
 
-  // Map courses to options for the select menu inside modal
   const cursosOptions = cursos.map((c) => ({
     id_curso: c.id_curso,
     nombre: c.nombre,
@@ -72,21 +72,22 @@ const MisCursosProfesor: React.FC = () => {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Vista global de mis cursos</h2>
-          <p className="text-sm text-gray-500 mt-1">Monitorea el avance de tus alumnos, califica entregas y gestiona cronogramas.</p>
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Mis Cursos</h2>
+          <p className="text-xs text-slate-400 font-medium mt-1">Monitorea el avance de tus alumnos, califica entregas y gestiona cronogramas.</p>
         </div>
-        <button
+        <Button
           onClick={() => handleOpenCreateModal()}
-          className="btn btn-primary flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded shadow-sm transition-all"
+          variant="primary"
+          size="sm"
+          icon={<Plus size={14} />}
           disabled={cursos.length === 0}
         >
-          <Plus size={18} className="mr-1.5" />
           Crear entregable
-        </button>
+        </Button>
       </div>
 
       {/* KPIs Section */}
@@ -94,22 +95,22 @@ const MisCursosProfesor: React.FC = () => {
         <StatCard
           label="Cursos a cargo"
           value={kpis.cursos_a_cargo}
-          icon={<BookOpen size={24} className="text-emerald-600" />}
+          icon={<BookOpen size={20} className="text-emerald-600" />}
         />
         <StatCard
           label="Estudiantes activos"
           value={kpis.estudiantes_activos}
-          icon={<Users size={24} className="text-emerald-600" />}
+          icon={<Users size={20} className="text-emerald-600" />}
         />
         <StatCard
           label="Entregas por revisar"
           value={kpis.entregas_por_revisar}
-          icon={<ClipboardCheck size={24} className="text-emerald-600" />}
+          icon={<ClipboardCheck size={20} className="text-emerald-600" />}
         />
         <StatCard
           label="Atrasos detectados"
           value={kpis.atrasos_detectados}
-          icon={<AlertTriangle size={24} className="text-emerald-600" />}
+          icon={<AlertTriangle size={20} className="text-emerald-600" />}
         />
       </div>
 

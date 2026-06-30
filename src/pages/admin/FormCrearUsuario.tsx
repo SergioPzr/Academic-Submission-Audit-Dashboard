@@ -75,7 +75,6 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Sin sesión');
 
-      // Intentar llamar Edge Function admin-create-user
       const resp = await fetch(`${supabaseUrl}/functions/v1/admin-create-user`, {
         method: 'POST',
         headers: {
@@ -93,11 +92,10 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
       setTempPassword(password);
       onCreated();
     } catch (err: any) {
-      // Si la Edge Function no está desplegada, mostrar instrucción clara
       if (err.message.includes('Failed to fetch') || err.message.includes('404')) {
         setSubmitError(
           '⚠️ La Edge Function "admin-create-user" no está desplegada. ' +
-          'Ejecuta: npx supabase functions new admin-create-user y deplóyala primero.'
+          'Deplóyala primero con Supabase CLI.'
         );
       } else {
         setSubmitError(err.message);
@@ -117,55 +115,62 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box modal-box-lg" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box modal-box-lg max-w-4xl" onClick={(e) => e.stopPropagation()}>
+        
         {/* Header */}
-        <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="modal-icon-badge">
-              <UserPlus size={18} color="var(--color-accent)" />
+        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100">
+              <UserPlus size={18} className="text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-h3">Crear Usuario</h3>
-              <p className="text-subtitle">Solo administradores pueden crear cuentas</p>
+              <h3 className="text-base font-bold text-slate-800">Crear Usuario</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Solo administradores pueden crear cuentas</p>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm modal-close-btn" onClick={onClose}>
+          <button className="text-slate-400 hover:text-slate-600 transition" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
 
-        {/* Success: show temp password */}
+        {/* Success Banner */}
         {tempPassword ? (
-          <div className="modal-body">
-            <div className="success-banner">
-              <h4 style={{ marginBottom: '0.5rem', color: 'var(--color-success)' }}>
+          <div className="p-6 text-center space-y-4">
+            <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-2xl space-y-3">
+              <h4 className="font-bold text-emerald-800">
                 ✓ Usuario creado exitosamente
               </h4>
-              <p className="text-subtitle" style={{ marginBottom: '1rem' }}>
-                Guarda la contraseña temporal. No volverá a mostrarse.
+              <p className="text-xs text-slate-500 font-medium">
+                Guarda la contraseña temporal. No volverá a mostrarse en el sistema.
               </p>
-              <div className="temp-password-box">
-                <span className="temp-password-text">
+              
+              <div className="temp-password-box justify-center max-w-md mx-auto mt-4">
+                <span className="text-sm font-bold font-mono tracking-wider text-emerald-950">
                   {showPass ? tempPassword : '•'.repeat(tempPassword.length)}
                 </span>
-                <button className="btn btn-ghost btn-sm" onClick={() => setShowPass(!showPass)}>
-                  {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                <button 
+                  type="button"
+                  className="text-slate-400 hover:text-slate-600 ml-2" 
+                  onClick={() => setShowPass(!showPass)}
+                >
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
-                <button className="btn btn-secondary btn-sm" onClick={handleCopy}>
-                  <Copy size={14} />
-                  <span style={{ marginLeft: '0.25rem' }}>{copied ? '¡Copiado!' : 'Copiar'}</span>
-                </button>
+                <Button variant="secondary" size="sm" className="ml-4 text-xs font-semibold py-1.5 px-3" onClick={handleCopy}>
+                  {copied ? '¡Copiado!' : 'Copiar'}
+                </Button>
               </div>
             </div>
-            <Button variant="primary" onClick={onClose} style={{ marginTop: '1.5rem', width: '100%' }}>
-              Cerrar
+            
+            <Button variant="primary" size="md" onClick={onClose} className="w-full mt-6">
+              Cerrar Ventana
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
-            <div className="modal-body modal-body-cols">
-              {/* Left: Form */}
-              <div className="modal-form-col">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-5 gap-6 text-left">
+              
+              {/* Left Column: Input Fields */}
+              <div className="md:col-span-3 space-y-4">
                 <Input
                   id="nuevo-nombre"
                   label="Nombre completo *"
@@ -174,6 +179,7 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
                   onChange={(e) => handleChange('nombre_completo', e.target.value)}
                   error={errors.nombre_completo}
                 />
+                
                 <Input
                   id="nuevo-codigo"
                   label="Código institucional *"
@@ -182,6 +188,7 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
                   onChange={(e) => handleChange('codigo_institucional', e.target.value)}
                   error={errors.codigo_institucional}
                 />
+                
                 <Input
                   id="nuevo-email"
                   label="Correo institucional *"
@@ -192,11 +199,15 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
                   error={errors.email}
                 />
 
-                <div className="input-group">
-                  <label className="input-label" htmlFor="nuevo-rol">Rol *</label>
+                <div className="flex flex-col w-full">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block" htmlFor="nuevo-rol">
+                    Rol *
+                  </label>
                   <select
                     id="nuevo-rol"
-                    className={`input-field${errors.id_rol ? ' input-error' : ''}`}
+                    className={`bg-white border rounded-xl py-2.5 px-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 cursor-pointer ${
+                      errors.id_rol ? 'border-red-300' : 'border-slate-200'
+                    }`}
                     value={form.id_rol}
                     onChange={(e) => handleChange('id_rol', e.target.value)}
                   >
@@ -207,7 +218,7 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
                       </option>
                     ))}
                   </select>
-                  {errors.id_rol && <span className="input-error-msg">{errors.id_rol}</span>}
+                  {errors.id_rol && <span className="text-xs text-red-600 font-medium mt-1">{errors.id_rol}</span>}
                 </div>
 
                 <Input
@@ -220,45 +231,46 @@ const FormCrearUsuario: React.FC<FormCrearUsuarioProps> = ({ onClose, onCreated 
                 />
               </div>
 
-              {/* Right: Rules */}
-              <div className="modal-rules-col">
-                <div className="rules-panel">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <Info size={16} color="var(--color-primary)" />
-                    <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Reglas de validación</span>
+              {/* Right Column: Validation rules */}
+              <div className="md:col-span-2">
+                <div className="h-full bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <Info size={16} className="text-emerald-600" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Reglas de validación</span>
                   </div>
-                  <ul className="rules-list">
-                    <li>El correo debe ser <strong>@urp.edu.pe</strong></li>
+                  
+                  <ul className="space-y-2 text-slate-500 text-xs font-medium pl-2 list-disc list-inside">
+                    <li>El correo debe ser <strong className="text-slate-700 font-bold">@urp.edu.pe</strong></li>
                     <li>El código institucional debe ser único</li>
-                    <li>La contraseña temporal se genera automáticamente</li>
-                    <li>El usuario deberá cambiarla en el primer inicio de sesión</li>
-                    <li>Solo usuarios <strong>activos</strong> pueden autenticarse</li>
+                    <li>La contraseña temporal se genera de forma segura</li>
+                    <li>Solo usuarios activos pueden ingresar al portal</li>
                   </ul>
 
-                  <div className="tip-panel" style={{ marginTop: '1.5rem' }}>
-                    <p style={{ fontSize: '0.8125rem', color: 'var(--color-warning)', fontWeight: 600, marginBottom: '0.5rem' }}>
+                  <div className="bg-amber-50/50 border border-amber-200/50 p-4 rounded-xl space-y-1.5 mt-8">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-amber-700">
                       💡 Tip
                     </p>
-                    <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
-                      Para matrícula masiva de alumnos en un curso, usa la pestaña <strong>Matrícula Masiva (CSV)</strong>.
+                    <p className="text-[11px] text-amber-900 leading-relaxed font-semibold">
+                      Para matrícula masiva de alumnos en un curso, usa la pestaña de <strong>Matrícula Masiva (CSV)</strong>.
                     </p>
                   </div>
                 </div>
               </div>
+
             </div>
 
             {submitError && (
-              <div className="admin-error-banner" style={{ margin: '0 1.5rem 1rem' }}>
-                <span style={{ fontSize: '0.8125rem' }}>{submitError}</span>
+              <div className="mx-6 mb-4 p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex items-center gap-2 text-xs font-semibold">
+                <span>{submitError}</span>
               </div>
             )}
 
-            <div className="modal-footer">
+            <div className="flex justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-2xl">
               <Button variant="secondary" type="button" onClick={onClose}>
                 Cancelar
               </Button>
               <Button variant="primary" type="submit" loading={loading} icon={<UserPlus size={14} />}>
-                {loading ? 'Creando…' : 'Crear usuario'}
+                Crear usuario
               </Button>
             </div>
           </form>

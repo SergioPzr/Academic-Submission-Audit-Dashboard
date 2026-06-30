@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Spinner from '../../components/ui/Spinner';
 import Badge from '../../components/ui/Badge';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
 import { getMisCursos } from '../../services/cursosService';
 import type { CursoConStats } from '../../services/cursosService';
 import { getEntregablesPorCurso } from '../../services/entregablesService';
@@ -10,7 +12,7 @@ import type { Entregable } from '../../services/entregablesService';
 import ModalCrearEntregable from './ModalCrearEntregable';
 import ModalProrrogaIndividual from './ModalProrrogaIndividual';
 import { formatInLimaTimezone } from '../../utils/dateUtils';
-import { ChevronLeft, ChevronRight, Plus, Edit2, UserPlus, Eye, CalendarCheck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Edit2, UserPlus, Eye, CalendarCheck, X } from 'lucide-react';
 
 const isSameDayLima = (calendarDate: Date, utcDateString: string): boolean => {
   try {
@@ -168,16 +170,16 @@ const CronogramaProfesor: React.FC = () => {
     let label = '';
 
     if (now > closeDate) {
-      colorClass = 'bg-gray-100 text-gray-700 border-gray-200';
+      colorClass = 'bg-slate-100 text-slate-500 border-slate-200';
       label = 'Cerrado';
     } else if (now < openDate) {
-      colorClass = 'bg-blue-50 text-blue-800 border-blue-200';
+      colorClass = 'bg-blue-50 text-blue-850 border-blue-200';
       label = 'Futuro';
     } else {
       const diffMs = closeDate.getTime() - now.getTime();
       const diffHrs = diffMs / (1000 * 60 * 60);
       if (diffHrs < 24) {
-        colorClass = 'bg-amber-100 text-amber-800 border-amber-300';
+        colorClass = 'bg-amber-50 text-amber-800 border-amber-300';
         label = 'Urgente (<24h)';
       } else {
         colorClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
@@ -221,23 +223,23 @@ const CronogramaProfesor: React.FC = () => {
   const calendarDays = generateCalendarDays(year, month);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left animate-fade-in">
       {/* Header and selector */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <CalendarCheck className="text-primary" />
-            Cronograma del Profesor
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+            <CalendarCheck className="text-emerald-700" size={24} />
+            <span>Cronograma del Profesor</span>
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Crea, edita y visualiza entregables en tu calendario mensual.</p>
+          <p className="text-xs text-slate-400 font-medium mt-1">Crea, edita y visualiza entregables en tu calendario mensual.</p>
         </div>
 
         {/* Selector de Curso */}
         <div className="flex items-center space-x-3 w-full md:w-auto">
-          <div className="flex flex-col w-full md:w-[220px]">
-            <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Filtrar por Curso</span>
+          <div className="flex flex-col w-full md:w-[240px]">
+            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Filtrar por Curso</span>
             <select
-              className="input-field py-1 px-3 bg-white text-sm"
+              className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-bold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
               value={cursoId}
               onChange={(e) => setCursoId(e.target.value)}
             >
@@ -252,52 +254,53 @@ const CronogramaProfesor: React.FC = () => {
       </div>
 
       {/* Calendar Navigation Panel */}
-      <div className="flex justify-between items-center bg-white p-4 border border-gray-100 rounded-xl shadow-sm">
+      <div className="flex justify-between items-center bg-white p-4 border border-slate-100 rounded-2xl shadow-sm">
         <div className="flex items-center space-x-2">
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+            className="p-2 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+            className="p-2 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
-          <h3 className="text-lg font-bold text-gray-800 ml-2">
+          <h3 className="text-base font-bold text-slate-800 ml-2">
             {MESES[month]} {year}
           </h3>
         </div>
 
-        <button
+        <Button
           onClick={handleToday}
-          className="btn btn-ghost text-sm font-semibold border px-3 py-1.5 rounded"
+          variant="secondary"
+          size="sm"
         >
           Hoy
-        </button>
+        </Button>
       </div>
 
       {/* Calendar Grid */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center p-24 space-y-3 bg-white rounded-xl border">
+        <div className="flex flex-col items-center justify-center p-24 space-y-3 bg-white rounded-2xl border border-slate-100">
           <Spinner size="lg" />
-          <p className="text-sm text-gray-500 font-medium">Cargando cronograma...</p>
+          <p className="text-xs text-slate-400 font-bold">Cargando cronograma...</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+        <Card className="overflow-hidden border border-slate-100 shadow-sm">
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 border-b bg-gray-50/50">
+          <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50">
             {DIAS_SEMANA.map(d => (
-              <div key={d} className="py-2.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <div key={d} className="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
                 {d}
               </div>
             ))}
           </div>
 
           {/* Days Grid */}
-          <div className="grid grid-cols-7 grid-rows-6 auto-rows-[110px] divide-x divide-y divide-gray-100">
+          <div className="grid grid-cols-7 gap-px bg-slate-100">
             {calendarDays.map((day, idx) => {
               const dateStr = day.date.toDateString();
               const isToday = new Date().toDateString() === dateStr;
@@ -310,34 +313,34 @@ const CronogramaProfesor: React.FC = () => {
                 <div
                   key={idx}
                   onClick={() => handleDayClick(day.date)}
-                  className={`p-1.5 flex flex-col justify-between transition-colors cursor-pointer group ${
-                    day.isCurrentMonth ? 'bg-white' : 'bg-gray-50/40 text-gray-400'
-                  } hover:bg-emerald-50/20`}
+                  className={`min-h-[110px] p-2 flex flex-col justify-between transition bg-white cursor-pointer group hover:bg-emerald-50/20 ${
+                    day.isCurrentMonth ? '' : 'text-slate-350'
+                  }`}
                 >
                   <div className="flex justify-between items-center">
                     <span
-                      className={`h-6 w-6 flex items-center justify-center text-xs font-bold rounded-full ${
+                      className={`h-6 w-6 flex items-center justify-center text-[11px] font-bold rounded-full ${
                         isToday
                           ? 'bg-emerald-600 text-white shadow-sm'
                           : day.isCurrentMonth
-                          ? 'text-gray-700'
-                          : 'text-gray-400'
+                          ? 'text-slate-800'
+                          : 'text-slate-350'
                       }`}
                     >
                       {day.date.getDate()}
                     </span>
-                    <Plus size={12} className="opacity-0 group-hover:opacity-100 text-gray-400 mr-1 transition-opacity" />
+                    <Plus size={12} className="opacity-0 group-hover:opacity-100 text-slate-400 mr-1 transition" />
                   </div>
 
-                  <div className="mt-1 space-y-1 overflow-y-auto flex-1 max-h-[75px] scrollbar-thin">
+                  <div className="mt-2 space-y-1 overflow-y-auto flex-1 max-h-[75px] pr-0.5">
                     {dayDeliverables.map((ent) => {
                       const { colorClass, label, isOpenNow } = getDeliverableStatusInfo(ent);
                       return (
                         <div
                           key={ent.id_entregable}
                           onClick={(e) => handleEventClick(e, ent)}
-                          className={`px-2 py-0.5 text-[10px] font-bold rounded border truncate transition-all duration-200 hover:scale-[1.02] ${colorClass} ${
-                            isOpenNow ? 'border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)] animate-pulse' : ''
+                          className={`px-2 py-1 text-[9px] font-extrabold rounded-lg border truncate transition-all duration-200 hover:scale-[1.02] ${colorClass} ${
+                            isOpenNow ? 'border-emerald-500 shadow-sm animate-pulse' : ''
                           }`}
                           title={`${ent.titulo} - Cierre: ${new Date(ent.fecha_cierre).toLocaleTimeString('es-PE', { timeZone: 'America/Lima' })} (${label})`}
                         >
@@ -350,17 +353,17 @@ const CronogramaProfesor: React.FC = () => {
               );
             })}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 justify-center bg-gray-50 p-4 border rounded-lg text-xs font-semibold text-gray-600">
+      <div className="flex flex-wrap gap-5 justify-center bg-slate-50/50 p-4 border border-slate-100 rounded-2xl text-[10px] font-bold text-slate-500">
         <div className="flex items-center gap-1.5">
           <div className="h-3 w-6 rounded border bg-emerald-50 border-emerald-200"></div>
           <span>Ventana Activa</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-6 rounded border bg-amber-100 border-amber-300"></div>
+          <div className="h-3 w-6 rounded border bg-amber-50 border-amber-300"></div>
           <span>Urgente (Cierre &lt;24h)</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -368,34 +371,34 @@ const CronogramaProfesor: React.FC = () => {
           <span>Ventana Futura</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-6 rounded border bg-gray-100 border-gray-200"></div>
+          <div className="h-3 w-6 rounded border bg-slate-50 border-slate-200"></div>
           <span>Ventana Cerrada</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-6 rounded border-2 border-emerald-500 bg-white animate-pulse shadow-sm"></div>
-          <span>Abierto Ahora (Borde Parpadeante)</span>
+          <div className="h-3 w-6 rounded-md border-2 border-emerald-500 bg-white animate-pulse shadow-sm"></div>
+          <span>Abierto Ahora</span>
         </div>
       </div>
 
       {/* Event Details Options Modal */}
       {optionsModalOpen && selectedEntregable && (
-        <div className="modal-overlay">
-          <div className="card max-w-sm w-full p-6 animate-fade-in bg-white rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-4 border-b pb-2">
-              <h3 className="text-lg font-bold text-gray-900 truncate pr-6">
+        <div className="modal-overlay" onClick={() => setOptionsModalOpen(false)}>
+          <div className="modal-box p-6 space-y-4 max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-800 truncate pr-6 text-left">
                 {selectedEntregable.titulo}
               </h3>
               <button
                 onClick={() => setOptionsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="text-slate-400 hover:text-slate-600 transition"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
-            <div className="space-y-3 mb-6 text-sm text-gray-600">
+            <div className="space-y-3 text-xs text-slate-500 text-left">
               {selectedEntregable.descripcion && (
-                <p className="bg-gray-50 p-2.5 rounded text-xs leading-relaxed text-gray-500 italic max-h-[80px] overflow-y-auto">
+                <p className="bg-slate-50 p-2.5 rounded-xl text-[11px] leading-relaxed text-slate-500 italic max-h-[80px] overflow-y-auto border border-slate-100">
                   {selectedEntregable.descripcion}
                 </p>
               )}
@@ -414,30 +417,36 @@ const CronogramaProfesor: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 pt-2">
-              <button
+            <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
+              <Button
                 onClick={handleEditClick}
-                className="flex items-center justify-center w-full btn btn-primary py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded shadow-sm"
+                variant="primary"
+                size="sm"
+                className="w-full"
+                icon={<Edit2 size={14} />}
               >
-                <Edit2 size={16} className="mr-2" />
                 Editar Entregable
-              </button>
+              </Button>
               
-              <button
+              <Button
                 onClick={handleProrrogaClick}
-                className="flex items-center justify-center w-full btn btn-ghost border py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded"
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                icon={<UserPlus size={14} />}
               >
-                <UserPlus size={16} className="mr-2" />
                 Otorgar Prórroga
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={handleMonitorClick}
-                className="flex items-center justify-center w-full btn btn-ghost border py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded"
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                icon={<Eye size={14} />}
               >
-                <Eye size={16} className="mr-2" />
                 Ver Monitor en Vivo
-              </button>
+              </Button>
             </div>
           </div>
         </div>
