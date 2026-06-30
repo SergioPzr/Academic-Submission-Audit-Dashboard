@@ -6,14 +6,16 @@ interface NavItemProps {
   label: string;
   path: string;
   icon: string;
+  onClick?: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ label, path, icon }) => {
+const NavItem: React.FC<NavItemProps> = ({ label, path, icon, onClick }) => {
   const IconComponent = (Icons as any)[icon] || Icons.HelpCircle;
 
   return (
     <NavLink
       to={path}
+      onClick={onClick}
       className={({ isActive }: { isActive: boolean }) => 
         `flex items-center gap-3.5 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 ${
           isActive 

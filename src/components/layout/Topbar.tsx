@@ -1,8 +1,12 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { User } from 'lucide-react';
+import { User, Menu } from 'lucide-react';
 
-const Topbar: React.FC = () => {
+interface TopbarProps {
+  onOpenSidebar: () => void;
+}
+
+const Topbar: React.FC<TopbarProps> = ({ onOpenSidebar }) => {
   const { perfil, rol } = useAuth();
 
   const getInitials = (name: string) => {
@@ -29,9 +33,18 @@ const Topbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4 flex items-center justify-between transition-all duration-200">
-      <div>
-        <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-3 py-1 rounded-full">
+    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 sm:px-8 py-4 flex items-center justify-between transition-all duration-200">
+      <div className="flex items-center gap-3">
+        {/* Hamburger Menu Button */}
+        <button
+          onClick={onOpenSidebar}
+          className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition active:scale-95 cursor-pointer"
+          title="Menú"
+        >
+          <Menu size={20} />
+        </button>
+
+        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200/50 px-3 py-1 rounded-full">
           {getPortalTitle()}
         </h2>
       </div>

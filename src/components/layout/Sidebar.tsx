@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import NavItem from './NavItem';
-import { LogOut, Shield } from 'lucide-react';
+import { LogOut, BookOpen, X } from 'lucide-react';
 
 const NAV_ITEMS = {
   alumno: [
@@ -22,19 +22,37 @@ const NAV_ITEMS = {
   ],
 };
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { rol, signOut } = useAuth();
   const items = rol && NAV_ITEMS[rol] ? NAV_ITEMS[rol] : [];
 
   return (
-    <aside className="w-[260px] bg-[#0A1F14] text-slate-300 flex flex-col h-screen shrink-0 border-r border-emerald-950/40 select-none">
+    <aside className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-[260px] bg-[#0A1F14] text-slate-300 flex flex-col h-screen shrink-0 border-r border-emerald-950/40 select-none transition-transform duration-300 ease-in-out ${
+      isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+    }`}>
       
       {/* Sidebar Logo / Header */}
-      <div className="h-[70px] border-b border-emerald-950/40 px-6 flex items-center gap-3">
-        <div className="bg-emerald-900/40 p-2 rounded-lg border border-emerald-800/30">
-          <Shield className="text-emerald-400 w-5 h-5" />
+      <div className="h-[70px] border-b border-emerald-950/40 px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-emerald-900/40 p-2 rounded-lg border border-emerald-800/30">
+            <BookOpen className="text-emerald-400 w-5 h-5" />
+          </div>
+          <span className="font-extrabold text-white tracking-widest text-lg">SRE-URP</span>
         </div>
-        <span className="font-extrabold text-white tracking-widest text-lg">SRE-URP</span>
+
+        {/* Close button on mobile */}
+        <button
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-emerald-900/30 transition cursor-pointer"
+          title="Cerrar menú"
+        >
+          <X size={18} />
+        </button>
       </div>
 
       {/* Navigation Links */}
@@ -45,6 +63,7 @@ const Sidebar: React.FC = () => {
             label={item.label}
             path={item.path}
             icon={item.icon}
+            onClick={onClose}
           />
         ))}
       </nav>
