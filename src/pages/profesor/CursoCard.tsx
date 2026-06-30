@@ -15,7 +15,7 @@ const CursoCard: React.FC<CursoCardProps> = ({ curso }) => {
   const { id_curso, codigo, nombre, seccion, total_alumnos, proximo_entregable, stats } = curso;
 
   // SVG Circular Progress calculation
-  const radius = 28;
+  const radius = 24;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (stats.pct_entregas / 100) * circumference;
 
