@@ -128,6 +128,25 @@ async function findOrCreateFolder(token: string, name: string, parentId: string)
   return folder.id;
 }
 
+async function shareFileWithAnyone(token: string, fileId: string): Promise<void> {
+  const url = `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      role: "reader",
+      type: "anyone",
+    }),
+  });
+
+  if (!response.ok) {
+    console.error(`Warning: Failed to share file ${fileId} with anyone: ${await response.text()}`);
+  }
+}
+
 async function uploadFileToDrive(
   token: string,
   fileName: string,
@@ -194,7 +213,12 @@ async function uploadFileToDrive(
   }
 
   const result = await response.json();
-  return result.webViewLink || `https://drive.google.com/open?id=${result.id}`;
+  const fileId = result.id;
+
+  // Make the file readable by anyone with the link
+  await shareFileWithAnyone(token, fileId);
+
+  return result.webViewLink || `https://drive.google.com/open?id=${fileId}`;
 }
 
 Deno.serve(async (req: Request) => {
@@ -337,42 +361,37 @@ Deno.serve(async (req: Request) => {
     }
 
     // 6. Handle Google Drive Upload or Fallback Mock
-    const googleEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL')
-    const googleKey = Deno.env.get('GOOGLE_PRIVATE_KEY')?.replace(/\\n/g, '\n')
-    const googleRootId = Deno.env.get('GOOGLE_DRIVE_ROOT_FOLDER_ID')
+    const googleEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL')?.replace(/^["']|["']$/g, '')
+    const googleKey = Deno.env.get('GOOGLE_PRIVATE_KEY')?.replace(/^["']|["']$/g, '')?.replace(/\\n/g, '\n')
+    const googleRootId = Deno.env.get('GOOGLE_DRIVE_ROOT_FOLDER_ID')?.replace(/^["']|["']$/g, '')
 
     let driveUrl = ''
 
     if (googleEmail && googleKey && googleRootId) {
-      try {
-        // Authenticate with Google
-        const token = await getGoogleAccessToken(googleEmail, googleKey)
+      // Authenticate with Google
+      const token = await getGoogleAccessToken(googleEmail, googleKey)
 
-        // Get student's details
-        const { data: studentPerfil } = await supabaseAdmin
-          .from('usuarios')
-          .select('nombre_completo')
-          .eq('id', idAlumno)
-          .single()
+      // Get student's details
+      const { data: studentPerfil } = await supabaseAdmin
+        .from('usuarios')
+        .select('nombre_completo')
+        .eq('id', idAlumno)
+        .single()
 
-        const studentName = studentPerfil?.nombre_completo || `Alumno_${idAlumno}`
-        const courseName = (entregable.cursos as any)?.nombre || `Curso_${idCurso}`
+      const studentName = studentPerfil?.nombre_completo || `Alumno_${idAlumno}`
+      const courseName = (entregable.cursos as any)?.nombre || `Curso_${idCurso}`
 
-        // Find or create course folder
-        const courseFolderId = await findOrCreateFolder(token, courseName, googleRootId)
+      // Find or create course folder
+      const courseFolderId = await findOrCreateFolder(token, courseName, googleRootId)
 
-        // Find or create deliverable folder
-        const taskFolderId = await findOrCreateFolder(token, entregable.titulo, courseFolderId)
+      // Find or create deliverable folder
+      const taskFolderId = await findOrCreateFolder(token, entregable.titulo, courseFolderId)
 
-        // Find or create student folder
-        const studentFolderId = await findOrCreateFolder(token, studentName, taskFolderId)
+      // Find or create student folder
+      const studentFolderId = await findOrCreateFolder(token, studentName, taskFolderId)
 
-        // Upload file
-        driveUrl = await uploadFileToDrive(token, file.name, file.type, fileBuffer, studentFolderId)
-      } catch (err: any) {
-        console.error('Google Drive integration failed, falling back to mock link:', err.message)
-        driveUrl = `https://drive.google.com/mock-file-id/${crypto.randomUUID()}`
-      }
+      // Upload file
+      driveUrl = await uploadFileToDrive(token, file.name, file.type, fileBuffer, studentFolderId)
     } else {
       console.warn('Google credentials are not set. Generating mock Drive link.')
       driveUrl = `https://drive.google.com/mock-file-id/${crypto.randomUUID()}`

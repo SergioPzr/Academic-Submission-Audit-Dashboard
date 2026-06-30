@@ -158,6 +158,9 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
               <p className="text-sm font-semibold text-gray-700 text-center">
                 Arrastra tu archivo aquí o <span className="text-emerald-700 hover:underline">haz clic para explorar</span>
               </p>
+              <p className="text-xs text-gray-400 mt-1.5 text-center">
+                Formatos soportados: Documentos (PDF, DOCX, XLSX), Código (.py, .java, etc.), Imágenes (PNG, JPG) y ZIP/RAR
+              </p>
               <p className="text-xs text-gray-400 mt-1">
                 Límite de tamaño: {formatBytes(MAX_FILE_SIZE)}
               </p>
