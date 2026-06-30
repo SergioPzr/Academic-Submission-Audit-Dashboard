@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { registrarEventoManual } from './auditService';
 
 export interface AlumnoCalificacion {
   id_alumno: string;
@@ -155,3 +156,91 @@ export async function modificarEvaluacion(
   if (error) throw error;
   return data;
 }
+
+export async function buscarAlumnoEnCurso(termino: string, idCurso: string): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('matriculas')
+    .select(`
+      id_alumno,
+      usuarios (
+        id,
+        nombre_completo,
+        codigo_institucional,
+        email
+      )
+    `)
+    .eq('id_curso', idCurso);
+
+  if (error) throw error;
+
+  const filtered = (data || []).map((m: any) => m.usuarios).filter((u: any) => {
+    if (!u) return false;
+    const term = termino.toLowerCase();
+    return u.nombre_completo.toLowerCase().includes(term) ||
+      (u.codigo_institucional && u.codigo_institucional.toLowerCase().includes(term));
+  });
+
+  return filtered;
+}
+
+export async function exportarReporteCSV(
+  idCurso: string,
+  idEntregable: string,
+  nombreCurso: string,
+  tituloEntregable: string
+): Promise<Blob> {
+  const data = await getEntregasPorEntregable(idCurso, idEntregable);
+
+  const headers = [
+    'CÓDIGO ALUMNO',
+    'NOMBRE ALUMNO',
+    'ENTREGABLE',
+    'ESTADO',
+    'FECHA ENVÍO',
+    'NOTA',
+    'RETROALIMENTACIÓN'
+  ];
+
+  const rows = data.map((student) => {
+    const formattedDate = student.entrega?.timestamp_servidor
+      ? new Date(student.entrega.timestamp_servidor).toLocaleString('es-PE', { timeZone: 'America/Lima' })
+      : '—';
+    const score = student.entrega?.revision?.nota !== null && student.entrega?.revision?.nota !== undefined
+      ? student.entrega.revision.nota.toFixed(2)
+      : '—';
+    const feedback = student.entrega?.revision?.retroalimentacion || '—';
+
+    return [
+      student.codigo_institucional || '—',
+      student.nombre_completo,
+      tituloEntregable,
+      student.estado_calificacion,
+      formattedDate,
+      score,
+      feedback
+    ];
+  });
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map((row) =>
+      row
+        .map((val) => {
+          const escaped = String(val).replace(/"/g, '""');
+          return `"${escaped}"`;
+        })
+        .join(',')
+    )
+  ].join('\n');
+
+  await registrarEventoManual('EXPORT_REPORT', {
+    curso_id: idCurso,
+    entregable_id: idEntregable,
+    curso_nombre: nombreCurso,
+    entregable_titulo: tituloEntregable,
+    total_alumnos: data.length
+  });
+
+  return new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+}
+

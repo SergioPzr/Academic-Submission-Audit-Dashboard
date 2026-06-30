@@ -10,10 +10,10 @@ import { getMisCursos } from '../../services/cursosService';
 import type { CursoConStats } from '../../services/cursosService';
 import { getEntregablesPorCurso } from '../../services/entregablesService';
 import type { Entregable } from '../../services/entregablesService';
-import { getEntregasPorEntregable, evaluarEntrega, modificarEvaluacion } from '../../services/calificacionService';
+import { getEntregasPorEntregable, evaluarEntrega, modificarEvaluacion, exportarReporteCSV } from '../../services/calificacionService';
 import type { AlumnoCalificacion } from '../../services/calificacionService';
 import { formatInLimaTimezone, formatBytes } from '../../utils/dateUtils';
-import { ArrowLeft, Search, FileText, Check, Edit3, Clipboard, HelpCircle, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Search, FileText, Check, Edit3, Clipboard, HelpCircle, GraduationCap, Info } from 'lucide-react';
 
 interface ModalEvaluarProps {
   isOpen: boolean;
@@ -185,6 +185,48 @@ const CalificacionProfesor: React.FC = () => {
   // Modal State
   const [evalSelectedStudent, setEvalSelectedStudent] = useState<AlumnoCalificacion | null>(null);
   const [evalModalOpen, setEvalModalOpen] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const handleExportReport = async () => {
+    const currentCourse = cursos.find(c => c.id_curso === cursoId);
+    const currentEntregable = entregables.find(e => e.id_entregable === entregableId);
+
+    if (filteredStudents.length === 0) {
+      setMessage({ text: 'No existen registros para los parámetros seleccionados', type: 'error' });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
+
+    try {
+      const blob = await exportarReporteCSV(
+        cursoId,
+        entregableId,
+        currentCourse?.nombre || 'Curso',
+        currentEntregable?.titulo || 'Entregable'
+      );
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const safeCourseName = (currentCourse?.nombre || 'curso')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/gi, '_');
+      const dateStr = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `reporte_${safeCourseName}_${dateStr}.csv`);
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setMessage({ text: 'Reporte de calificaciones exportado exitosamente', type: 'success' });
+      setTimeout(() => setMessage(null), 5000);
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: err.message || 'Error al exportar el reporte', type: 'error' });
+      setTimeout(() => setMessage(null), 5000);
+    }
+  };
 
   // 1. Fetch courses
   useEffect(() => {
@@ -280,6 +322,26 @@ const CalificacionProfesor: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {message && (
+        <div 
+          className="admin-error-banner animate-fade-in" 
+          style={{ 
+            backgroundColor: message.type === 'success' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            borderColor: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
+            color: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid'
+          }}
+        >
+          <Info size={16} />
+          <span>{message.text}</span>
+        </div>
+      )}
       {/* Header and selector */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
         <div className="flex items-center space-x-3">
@@ -377,16 +439,31 @@ const CalificacionProfesor: React.FC = () => {
         {/* Search header */}
         <div className="p-4 border-b bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
           <h4 className="font-bold text-gray-800 text-sm">Estudiantes Matriculados</h4>
-          <div className="relative w-full sm:w-[300px]">
-            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
-            <input
-              type="text"
-              className="input-field pl-9 py-1.5 text-sm bg-white"
-              placeholder="Buscar alumno por nombre o código..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              disabled={loadingGrid}
-            />
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-[250px]">
+              <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                className="input-field pl-9 py-1.5 text-sm bg-white"
+                placeholder="Buscar alumno por nombre o código..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                disabled={loadingGrid}
+              />
+            </div>
+            <button
+              onClick={handleExportReport}
+              disabled={loadingGrid || filteredStudents.length === 0}
+              className="btn btn-primary text-xs font-semibold py-1.5 px-3 flex items-center gap-1.5"
+              style={{
+                height: '38px',
+                opacity: (loadingGrid || filteredStudents.length === 0) ? 0.6 : 1,
+                cursor: (loadingGrid || filteredStudents.length === 0) ? 'not-allowed' : 'pointer'
+              }}
+              title={filteredStudents.length === 0 ? 'No existen registros para exportar' : 'Exportar calificaciones'}
+            >
+              <span>↓ Exportar CSV/Excel</span>
+            </button>
           </div>
         </div>
 
@@ -505,9 +582,11 @@ const CalificacionProfesor: React.FC = () => {
         ) : (
           <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center space-y-3">
             <Clipboard size={40} className="text-gray-300" />
-            <p className="font-medium">No se encontraron estudiantes matriculados</p>
+            <p className="font-medium">
+              {search ? 'No existen registros para los parámetros seleccionados' : 'No se encontraron estudiantes matriculados'}
+            </p>
             <p className="text-xs max-w-sm text-gray-400">
-              {entregableId ? 'No hay alumnos que coincidan con la búsqueda.' : 'Seleccione un curso y entregable válido.'}
+              {search ? 'Intente modificando los términos de búsqueda.' : (entregableId ? 'No hay alumnos matriculados en este curso.' : 'Seleccione un curso y entregable válido.')}
             </p>
           </div>
         )}
