@@ -14,6 +14,9 @@ import CronogramaAlumno from '../pages/alumno/CronogramaAlumno';
 
 // Professor Pages
 import MisCursosProfesor from '../pages/profesor/MisCursosProfesor';
+import MonitorVivo from '../pages/profesor/MonitorVivo';
+import CalificacionProfesor from '../pages/profesor/CalificacionProfesor';
+import CronogramaProfesor from '../pages/profesor/CronogramaProfesor';
 
 // Admin Pages
 import PanelAdmin from '../pages/admin/PanelAdmin';
@@ -170,7 +173,7 @@ const AppRouter: React.FC = () => {
             path="/profesor/monitor"
             element={
               <ProtectedRoute allowedRoles={['profesor']}>
-                <DummyPage title="Monitor en Vivo de Entregas" />
+                <MonitorVivo />
               </ProtectedRoute>
             }
           />
@@ -178,7 +181,7 @@ const AppRouter: React.FC = () => {
             path="/profesor/calificacion"
             element={
               <ProtectedRoute allowedRoles={['profesor']}>
-                <DummyPage title="Calificación de Entregas" />
+                <CalificacionProfesor />
               </ProtectedRoute>
             }
           />
@@ -186,7 +189,7 @@ const AppRouter: React.FC = () => {
             path="/profesor/cronograma"
             element={
               <ProtectedRoute allowedRoles={['profesor']}>
-                <DummyPage title="Cronograma del Profesor" />
+                <CronogramaProfesor />
               </ProtectedRoute>
             }
           />
