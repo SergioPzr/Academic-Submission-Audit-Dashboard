@@ -20,6 +20,7 @@ import CronogramaProfesor from '../pages/profesor/CronogramaProfesor';
 
 // Admin Pages
 import PanelAdmin from '../pages/admin/PanelAdmin';
+import UsuariosCursos from '../pages/admin/UsuariosCursos';
 
 // Route Guards
 const ProtectedRoute: React.FC<{
@@ -207,7 +208,7 @@ const AppRouter: React.FC = () => {
             path="/admin/usuarios"
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
-                <DummyPage title="Gestión de Usuarios & Cursos" />
+                <UsuariosCursos />
               </ProtectedRoute>
             }
           />
