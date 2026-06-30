@@ -274,3 +274,28 @@ export async function procesarMatriculaMasiva(filas: FilaCSVValidada[]): Promise
     return { insertadas: inserts.length };
   }
 }
+
+export async function matricularAlumno(idAlumno: string, idCurso: string): Promise<void> {
+  const { error } = await supabase
+    .from('matriculas')
+    .insert({ id_alumno: idAlumno, id_curso: idCurso });
+  if (error) throw error;
+}
+
+export async function desmatricularAlumno(idAlumno: string, idCurso: string): Promise<void> {
+  const { error } = await supabase
+    .from('matriculas')
+    .delete()
+    .eq('id_alumno', idAlumno)
+    .eq('id_curso', idCurso);
+  if (error) throw error;
+}
+
+export async function getMatriculasAlumno(idAlumno: string): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('matriculas')
+    .select('id_curso')
+    .eq('id_alumno', idAlumno);
+  if (error) throw error;
+  return data || [];
+}

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Search, UserCheck, UserX, RefreshCw } from 'lucide-react';
+import { Search, UserCheck, UserX, RefreshCw, GraduationCap } from 'lucide-react';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
 import Button from '../../components/ui/Button';
+import ModalMatricularIndividual from './ModalMatricularIndividual';
 import {
   getUsuarios,
   editarEstadoUsuario,
@@ -20,6 +21,7 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
   const [busqueda, setBusqueda] = useState('');
   const [filtroRol, setFiltroRol] = useState<string>('todos');
   const [error, setError] = useState<string | null>(null);
+  const [selectedAlumno, setSelectedAlumno] = useState<UsuarioCompleto | null>(null);
 
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
@@ -157,16 +159,30 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
                         />
                       </td>
                       <td>
-                        <Button
-                          variant={u.estado === 'activo' ? 'ghost' : 'secondary'}
-                          size="sm"
-                          loading={actionLoading === u.id}
-                          icon={u.estado === 'activo' ? <UserX size={14} /> : <UserCheck size={14} />}
-                          onClick={() => handleToggleEstado(u)}
-                          className={u.estado === 'activo' ? 'btn-danger-ghost' : ''}
-                        >
-                          {u.estado === 'activo' ? 'Deshabilitar' : 'Habilitar'}
-                        </Button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {u.roles?.nombre === 'alumno' && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              icon={<GraduationCap size={14} />}
+                              onClick={() => setSelectedAlumno(u)}
+                              disabled={u.estado !== 'activo'}
+                              title={u.estado !== 'activo' ? 'El alumno debe estar activo para matricularlo' : 'Matricular estudiante'}
+                            >
+                              Matricular
+                            </Button>
+                          )}
+                          <Button
+                            variant={u.estado === 'activo' ? 'ghost' : 'secondary'}
+                            size="sm"
+                            loading={actionLoading === u.id}
+                            icon={u.estado === 'activo' ? <UserX size={14} /> : <UserCheck size={14} />}
+                            onClick={() => handleToggleEstado(u)}
+                            className={u.estado === 'activo' ? 'btn-danger-ghost' : ''}
+                          >
+                            {u.estado === 'activo' ? 'Deshabilitar' : 'Habilitar'}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -175,6 +191,13 @@ const ListaUsuarios: React.FC<ListaUsuariosProps> = ({ onRefresh }) => {
             </table>
           </div>
         </>
+      )}
+
+      {selectedAlumno && (
+        <ModalMatricularIndividual
+          alumno={selectedAlumno}
+          onClose={() => setSelectedAlumno(null)}
+        />
       )}
     </div>
   );
