@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const lastUserIdRef = useRef<string | null>(null);
 
-  const fetchPerfil = async (userId: string) => {
+  const fetchPerfil = async (userId: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase
         .from('usuarios')
@@ -42,19 +42,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (error) {
+      if (error || !data) {
         console.error('Error fetching user profile:', error);
         setPerfil(null);
         setRol(null);
-      } else if (data) {
+        return false;
+      } else {
         const userPerfil = data as unknown as UserPerfil;
         setPerfil(userPerfil);
         setRol((userPerfil.roles?.nombre as any) || null);
+        return true;
       }
     } catch (err) {
       console.error('Unexpected error fetching user profile:', err);
       setPerfil(null);
       setRol(null);
+      return false;
     }
   };
 
@@ -65,7 +68,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       if (session?.user) {
         lastUserIdRef.current = session.user.id;
-        fetchPerfil(session.user.id).then(() => setLoading(false));
+        fetchPerfil(session.user.id).then(async (hasProfile) => {
+          if (!hasProfile) {
+            sessionStorage.setItem('sre_auth_error', 'Tu cuenta no está registrada en el sistema. Contacta al administrador para que cree tu perfil institucional.');
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setPerfil(null);
+            setRol(null);
+          }
+          setLoading(false);
+        });
       } else {
         setLoading(false);
       }
@@ -84,7 +97,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         lastUserIdRef.current = newUser.id;
         setLoading(true);
-        await fetchPerfil(newUser.id);
+        const hasProfile = await fetchPerfil(newUser.id);
+        if (!hasProfile) {
+          sessionStorage.setItem('sre_auth_error', 'Tu cuenta no está registrada en el sistema. Contacta al administrador para que cree tu perfil institucional.');
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setPerfil(null);
+          setRol(null);
+        }
         setLoading(false);
       } else {
         lastUserIdRef.current = null;

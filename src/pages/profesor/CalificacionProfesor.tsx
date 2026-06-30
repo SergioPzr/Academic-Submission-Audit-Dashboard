@@ -85,32 +85,33 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
   };
 
   return (
-    <div className="modal-overlay" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}>
-      <div className="card max-w-md w-full p-6 animate-fade-in bg-white rounded-lg shadow-lg border">
-        <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <h3 className="text-xl font-bold text-gray-900">
+    <div className="modal-overlay">
+      <div className="modal-box p-6 space-y-4">
+        {/* Header */}
+        <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+          <h3 className="text-lg font-bold text-slate-800">
             {isEditing ? 'Modificar Calificación' : 'Evaluar Entrega'}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 focus:outline-none">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold transition">
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm font-medium border border-red-200">
+          <div className="bg-red-50 text-red-700 text-xs font-semibold p-3.5 rounded-xl border border-red-200">
             {error}
           </div>
         )}
 
         {isEditing && (
-          <div className="text-xs font-semibold text-gray-500 mb-3 bg-gray-50 p-2 rounded border flex justify-between items-center">
-            <span>Modificaciones realizadas: <span className="font-bold text-gray-800">{modificacionesCount}/3</span></span>
+          <div className="text-xs font-bold text-slate-500 bg-slate-50 border p-3 rounded-xl flex justify-between items-center">
+            <span>Modificaciones realizadas: <span className="text-slate-800">{modificacionesCount}/3</span></span>
             {attemptsLeft > 0 ? (
-              <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                 {attemptsLeft} intentos restantes
               </span>
             ) : (
-              <span className="text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+              <span className="text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
                 Límite alcanzado
               </span>
             )}
@@ -118,12 +119,13 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
         )}
 
         {isEditingDisabled && (
-          <div className="bg-amber-50 text-amber-800 p-3 rounded mb-4 text-xs font-medium border border-amber-200">
+          <div className="bg-amber-50 text-amber-800 p-3.5 border border-amber-200 rounded-xl text-xs font-bold leading-relaxed">
             ⚠️ Límite de modificaciones alcanzado (3 de 3). Solo se permite visualizar la calificación.
           </div>
         )}
 
-        <div className="mb-4 bg-gray-50 p-3 rounded text-sm text-gray-700 space-y-1 border">
+        {/* Alumno Info */}
+        <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-xs space-y-1.5 text-slate-700 text-left">
           <p><strong>Alumno:</strong> {student.nombre_completo}</p>
           <p><strong>Código:</strong> {student.codigo_institucional || '---'}</p>
           {student.entrega && (
@@ -134,56 +136,61 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {student.entrega?.drive_url && (
-            <div className="pt-1 pb-3">
-              <a
-                href={student.entrega.drive_url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center p-2.5 border border-dashed border-emerald-300 bg-emerald-50/50 hover:bg-emerald-50 rounded-lg text-emerald-800 text-sm font-bold text-center transition-colors"
-              >
-                <FileText size={18} className="mr-2 text-emerald-600" />
-                Abrir Archivo en Google Drive
-              </a>
-            </div>
+            <a
+              href={student.entrega.drive_url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center py-3 border border-dashed border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-xl hover:bg-emerald-100 transition-colors"
+            >
+              <FileText size={16} className="mr-2 text-emerald-600" />
+              Abrir Archivo de Entrega
+            </a>
           )}
 
-          <Input
-            type="number"
-            step="0.5"
-            min="0"
-            max="20"
-            label="Nota (0.00 a 20.00)"
-            placeholder="Ej. 17.5"
-            value={nota}
-            onChange={(e) => setNota(e.target.value)}
-            required
-            disabled={loading || isEditingDisabled}
-          />
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Nota (0.00 a 20.00)</label>
+            <input
+              type="number"
+              step="0.5"
+              min="0"
+              max="20"
+              placeholder="Ej. 17.5"
+              value={nota}
+              onChange={(e) => setNota(e.target.value)}
+              required
+              disabled={loading || isEditingDisabled}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 disabled:opacity-60"
+            />
+          </div>
 
-          <div className="input-group">
-            <label className="input-label font-semibold text-sm text-gray-700">Retroalimentación / Comentarios</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Retroalimentación / Comentarios</label>
             <textarea
-              className="input-field min-h-[100px] py-2 border rounded-lg w-full p-2.5 mt-1 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 min-h-[100px] transition-all duration-200 disabled:opacity-60"
               placeholder="Escriba aquí los comentarios de la evaluación..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               disabled={loading || isEditingDisabled}
               maxLength={500}
             />
-            <div className="text-right text-[10px] text-gray-400 mt-1">
+            <div className="text-right text-[10px] text-slate-400 font-bold mt-1">
               {feedback.length}/500 caracteres
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
             <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" loading={loading} disabled={isEditingDisabled}>
+            <button
+              type="submit"
+              disabled={isEditingDisabled || loading}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
               Guardar Nota
-            </Button>
+            </button>
           </div>
         </form>
       </div>
@@ -195,15 +202,12 @@ const CalificacionProfesor: React.FC = () => {
   const { perfil } = useAuth();
   const navigate = useNavigate();
 
-  // Selected Course and Deliverable
   const [cursoId, setCursoId] = useState<string>(sessionStorage.getItem('calificacion_curso_id') || '');
   const [entregableId, setEntregableId] = useState<string>(sessionStorage.getItem('calificacion_entregable_id') || '');
 
-  // Selectable options
   const [cursos, setCursos] = useState<CursoConStats[]>([]);
   const [entregables, setEntregables] = useState<Entregable[]>([]);
 
-  // Students list
   const [students, setStudents] = useState<AlumnoCalificacion[]>([]);
   const [search, setSearch] = useState('');
   
@@ -211,7 +215,6 @@ const CalificacionProfesor: React.FC = () => {
   const [loadingGrid, setLoadingGrid] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal State
   const [evalSelectedStudent, setEvalSelectedStudent] = useState<AlumnoCalificacion | null>(null);
   const [evalModalOpen, setEvalModalOpen] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -350,52 +353,46 @@ const CalificacionProfesor: React.FC = () => {
   const currentEntregable = entregables.find(e => e.id_entregable === entregableId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left">
       {message && (
         <div 
-          className="admin-error-banner animate-fade-in" 
-          style={{ 
-            backgroundColor: message.type === 'success' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-            borderColor: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
-            color: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid'
+          className="p-4 border border-emerald-200 bg-emerald-50 text-emerald-800 rounded-xl flex items-center gap-2 text-xs font-semibold animate-fade-in"
+          style={{
+            backgroundColor: message.type === 'success' ? '#ECFDF5' : '#FEF2F2',
+            borderColor: message.type === 'success' ? '#A7F3D0' : '#FEE2E2',
+            color: message.type === 'success' ? '#065F46' : '#991B1B',
           }}
         >
           <Info size={16} />
           <span>{message.text}</span>
         </div>
       )}
+
       {/* Header and selector */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-slate-100 pb-5">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/profesor')}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
+            className="p-2.5 rounded-xl border hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition"
             title="Volver"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <GraduationCap className="text-primary" />
-              Calificación de Entregas
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <GraduationCap className="text-emerald-700 w-6 h-6" />
+              <span>Calificación de Entregas</span>
             </h2>
-            <p className="text-sm text-gray-500 mt-0.5">Asigne y modifique calificaciones del curso.</p>
+            <p className="text-xs text-slate-400 font-medium">Asigne y modifique calificaciones de entregables.</p>
           </div>
         </div>
 
         {/* Course & Deliverable selectors */}
-        <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Curso</span>
+        <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
+          <div className="flex flex-col w-full sm:w-[180px]">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">Curso</span>
             <select
-              className="input-field py-1 px-3 bg-white text-sm"
+              className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
               value={cursoId}
               onChange={(e) => {
                 const id = e.target.value;
@@ -408,16 +405,16 @@ const CalificacionProfesor: React.FC = () => {
             >
               {cursos.map(c => (
                 <option key={c.id_curso} value={c.id_curso}>
-                  {c.codigo} - {c.seccion}
+                  {c.codigo} - Sec. {c.seccion}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Entregable</span>
+          <div className="flex flex-col w-full sm:w-[220px]">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">Entregable</span>
             <select
-              className="input-field py-1 px-3 bg-white text-sm min-w-[150px]"
+              className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
               value={entregableId}
               onChange={(e) => {
                 const id = e.target.value;
@@ -442,85 +439,81 @@ const CalificacionProfesor: React.FC = () => {
 
       {/* Summary KPI section */}
       {currentCourse && currentEntregable && (
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-emerald-50/50 p-4 border border-emerald-100 rounded-xl">
-          <div className="text-center sm:text-left">
-            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-bold">Curso Seleccionado</p>
-            <p className="text-base font-bold text-gray-900 mt-0.5 truncate">{currentCourse.nombre}</p>
-            <p className="text-xs text-gray-600">Entregable: {currentEntregable.titulo}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-emerald-50/40 p-5 border border-emerald-100 rounded-2xl">
+          <div className="col-span-2 lg:col-span-1">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-extrabold">Curso / Actividad</p>
+            <p className="text-sm font-bold text-slate-800 mt-1 truncate">{currentCourse.nombre}</p>
+            <p className="text-xs text-slate-500 font-medium">{currentEntregable.titulo}</p>
           </div>
-          <div className="text-center border-t sm:border-t-0 sm:border-l border-emerald-200/60 pt-2 sm:pt-0">
-            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-bold">Por Calificar</p>
-            <p className="text-xl font-bold text-emerald-950 mt-0.5">{entregadosCount}</p>
+          <div className="border-l border-emerald-200/50 pl-4">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-extrabold">Por Calificar</p>
+            <p className="text-lg font-black text-slate-800 mt-1">{entregadosCount}</p>
           </div>
-          <div className="text-center border-t sm:border-t-0 sm:border-l border-emerald-200/60 pt-2 sm:pt-0">
-            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-bold">Calificados</p>
-            <p className="text-xl font-bold text-emerald-950 mt-0.5">{calificadosCount} / {totalAlumnos}</p>
+          <div className="border-l border-emerald-200/50 pl-4">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-extrabold">Calificados</p>
+            <p className="text-lg font-black text-slate-800 mt-1">{calificadosCount} / {totalAlumnos}</p>
           </div>
-          <div className="text-center border-t sm:border-t-0 sm:border-l border-emerald-200/60 pt-2 sm:pt-0">
-            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-bold">Sin Entregar</p>
-            <p className="text-xl font-bold text-red-600 mt-0.5">{pendientesCount}</p>
+          <div className="border-l border-emerald-200/50 pl-4">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-extrabold">Sin Entregar</p>
+            <p className="text-lg font-black text-red-600 mt-1">{pendientesCount}</p>
           </div>
         </div>
       )}
 
       {/* Main Table view */}
-      <Card className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+      <Card className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
         {/* Search header */}
-        <div className="p-4 border-b bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h4 className="font-bold text-gray-800 text-sm">Estudiantes Matriculados</h4>
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <h4 className="font-bold text-slate-800 text-sm">Alumnos y Estados</h4>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <div className="relative w-full sm:w-[250px]">
-              <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+              <Search size={16} className="absolute left-3.5 top-3 text-slate-400" />
               <input
                 type="text"
-                className="input-field pl-9 py-1.5 text-sm bg-white"
-                placeholder="Buscar alumno por nombre o código..."
+                className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition"
+                placeholder="Buscar alumno..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 disabled={loadingGrid}
               />
             </div>
+            
             <button
               onClick={handleExportReport}
               disabled={loadingGrid || filteredStudents.length === 0}
-              className="btn btn-primary text-xs font-semibold py-1.5 px-3 flex items-center gap-1.5"
-              style={{
-                height: '38px',
-                opacity: (loadingGrid || filteredStudents.length === 0) ? 0.6 : 1,
-                cursor: (loadingGrid || filteredStudents.length === 0) ? 'not-allowed' : 'pointer'
-              }}
-              title={filteredStudents.length === 0 ? 'No existen registros para exportar' : 'Exportar calificaciones'}
+              className="w-full sm:w-auto text-xs font-bold py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-600/10 hover:shadow-lg transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>↓ Exportar CSV/Excel</span>
+              <span>Exportar Reporte</span>
             </button>
           </div>
         </div>
 
         {loadingGrid ? (
-          <div className="flex flex-col items-center justify-center p-16 space-y-3">
+          <div className="flex flex-col items-center justify-center p-16 gap-3">
             <Spinner size="lg" />
-            <p className="text-sm text-gray-500 font-medium">Cargando datos de evaluación...</p>
+            <p className="text-xs text-slate-400 font-bold">Cargando entregas...</p>
           </div>
         ) : error ? (
-          <div className="p-12 text-center text-red-500 flex flex-col items-center justify-center gap-2">
+          <div className="p-16 text-center text-red-500 flex flex-col items-center justify-center gap-2">
             <HelpCircle size={36} />
-            <p className="font-semibold">{error}</p>
+            <p className="font-bold text-sm">{error}</p>
           </div>
         ) : filteredStudents.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
-              <thead className="bg-gray-50/50">
+            <table className="min-w-full divide-y divide-slate-100">
+              <thead className="bg-slate-50/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Código</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Alumno</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Enviado</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Archivo</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Nota</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Acción</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Código</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Alumno</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Enviado</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Archivo</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Nota</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Acción</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
+              <tbody className="bg-white divide-y divide-slate-100">
                 {filteredStudents.map((student) => {
                   let badgeVariant: 'neutral' | 'success' | 'warning' | 'error' = 'neutral';
                   let statusLabel = student.estado_calificacion;
@@ -540,66 +533,66 @@ const CalificacionProfesor: React.FC = () => {
                   const score = student.entrega?.revision?.nota;
 
                   return (
-                    <tr key={student.id_alumno} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <tr key={student.id_alumno} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs font-bold text-slate-900 font-mono">
                         {student.codigo_institucional || '---'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                        {student.nombre_completo}
-                        <span className="text-[10px] text-gray-400 block font-normal mt-0.5">{student.email}</span>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-left">
+                        <p className="font-bold text-slate-800">{student.nombre_completo}</p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">{student.email}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge variant={badgeVariant} label={statusLabel} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-medium">
                         {student.entrega
                           ? formatInLimaTimezone(student.entrega.timestamp_servidor, 'full')
                           : '---'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px] truncate">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs max-w-[200px] truncate">
                         {student.entrega ? (
                           <a
                             href={student.entrega.drive_url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-emerald-600 hover:text-emerald-700 font-semibold underline"
+                            className="text-emerald-600 hover:text-emerald-800 font-bold hover:underline"
                             title={student.entrega.nombre_archivo}
                           >
                             {student.entrega.nombre_archivo}
                           </a>
                         ) : (
-                          <span className="text-gray-400">---</span>
+                          <span className="text-slate-400 font-medium">---</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs font-bold">
                         {isGraded && score !== null && score !== undefined ? (
-                          <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
-                            {score.toFixed(2)} / 20
+                          <span className="text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/50 font-bold font-mono">
+                            {score.toFixed(1)}
                           </span>
                         ) : (
-                          <span className="text-gray-400 font-medium">---</span>
+                          <span className="text-slate-400 font-medium">---</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs">
                         {hasEntrega ? (
                           <button
                             onClick={() => handleOpenEvalModal(student)}
-                            className="flex items-center text-primary hover:text-primary-dark font-bold underline transition-colors"
+                            className="flex items-center gap-1 text-emerald-700 hover:text-emerald-950 font-bold underline transition"
                           >
                             {isGraded ? (
                               <>
-                                <Edit3 size={14} className="mr-1" />
-                                Modificar
+                                <Edit3 size={12} />
+                                <span>Modificar</span>
                               </>
                             ) : (
                               <>
-                                <Check size={14} className="mr-1" />
-                                Evaluar
+                                <Check size={12} />
+                                <span>Evaluar</span>
                               </>
                             )}
                           </button>
                         ) : (
-                          <span className="text-gray-400">N/A</span>
+                          <span className="text-slate-400 font-medium">---</span>
                         )}
                       </td>
                     </tr>
@@ -609,12 +602,12 @@ const CalificacionProfesor: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center space-y-3">
-            <Clipboard size={40} className="text-gray-300" />
-            <p className="font-medium">
+          <div className="p-16 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+            <Clipboard size={40} className="text-slate-200" />
+            <p className="font-bold text-sm">
               {search ? 'No existen registros para los parámetros seleccionados' : 'No se encontraron estudiantes matriculados'}
             </p>
-            <p className="text-xs max-w-sm text-gray-400">
+            <p className="text-xs max-w-sm text-slate-400 leading-relaxed font-medium">
               {search ? 'Intente modificando los términos de búsqueda.' : (entregableId ? 'No hay alumnos matriculados en este curso.' : 'Seleccione un curso y entregable válido.')}
             </p>
           </div>

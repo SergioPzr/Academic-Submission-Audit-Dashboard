@@ -24,7 +24,9 @@ import {
   FileText, 
   Calendar, 
   ArrowRight, 
-  FileCheck 
+  FileCheck,
+  User,
+  GraduationCap
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
@@ -61,20 +63,14 @@ const PanelAlumno: React.FC = () => {
     
     loadData();
 
-    // Set up Realtime subscriptions to automatically refresh the panel
+    // Set up Realtime subscription on 'entregas' table (synchronized with 'revisiones' via db trigger)
     const entregasSubscription = supabase
       .channel('alumno-dashboard-realtime')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'entregas', filter: `id_alumno=eq.${perfil.id}` },
         () => {
-          loadData();
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'revisiones' },
-        () => {
+          console.log('Realtime change detected in entregas, reloading data...');
           loadData();
         }
       )
@@ -108,12 +104,12 @@ const PanelAlumno: React.FC = () => {
   const handleUploadSuccess = (constanciaData: any) => {
     setSelectedConstancia(constanciaData);
     setIsConstanciaOpen(true);
-    loadData(); // Reload KPIs and delivery statuses
+    loadData();
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-96">
         <Spinner size="lg" />
       </div>
     );
@@ -124,60 +120,74 @@ const PanelAlumno: React.FC = () => {
   const gradedDeliverables = entregables.filter(e => e.estado_entrega === 'calificado');
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-left">
       {/* Welcome Banner */}
-      <div className="bg-white p-6 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">¡Bienvenido, {perfil?.nombre_completo}!</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Código: <span className="font-mono font-semibold">{perfil?.codigo_institucional || 'N/A'}</span> · {perfil?.facultad || 'Facultad de Ingeniería'}
-          </p>
-        </div>
-        <div className="text-xs text-gray-400 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border flex items-center gap-1.5">
-          <Clock size={14} />
-          <span>Hora Local (PET): {formatInLimaTimezone(new Date())}</span>
+      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-800 to-emerald-950 p-6 lg:p-8 rounded-2xl border border-emerald-900/20 shadow-sm text-white">
+        {/* Glow */}
+        <div className="absolute right-0 top-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 z-10 relative">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="text-emerald-400 w-6 h-6" />
+              <span className="text-xs font-bold tracking-widest uppercase text-emerald-300">Estudiante URP</span>
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight">
+              ¡Bienvenido, {perfil?.nombre_completo}!
+            </h1>
+            <p className="text-xs text-emerald-200/80 font-medium">
+              Código Institucional: <span className="font-mono font-bold bg-emerald-900/50 px-2 py-0.5 rounded border border-emerald-800/40 text-emerald-100">{perfil?.codigo_institucional || 'N/A'}</span> · {perfil?.facultad || 'Facultad de Ingeniería'}
+            </p>
+          </div>
+          
+          <div className="bg-emerald-900/40 border border-emerald-800/40 px-4 py-2.5 rounded-xl flex items-center gap-2 text-xs font-semibold text-emerald-200 shrink-0">
+            <Clock size={16} className="text-emerald-400" />
+            <span>Zona Horaria (Lima): {formatInLimaTimezone(new Date())}</span>
+          </div>
         </div>
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard 
           label="Entregables Activos" 
           value={kpis.activos} 
-          icon={<BookOpen size={24} className="text-emerald-700" />}
-          className="border-l-4 border-l-emerald-600"
+          icon={<BookOpen size={22} className="text-emerald-700" />}
+          className="border border-slate-100 bg-white hover:border-emerald-200 hover:shadow-md transition-all duration-200"
         />
         <StatCard 
-          label="Pendientes <24h" 
+          label="Urgentes (< 24 hrs)" 
           value={kpis.urgentes} 
-          icon={<Clock size={24} className="text-amber-500" />}
-          className="border-l-4 border-l-amber-500"
+          icon={<Clock size={22} className="text-amber-600" />}
+          className="border border-slate-100 bg-white hover:border-amber-200 hover:shadow-md transition-all duration-200"
         />
         <StatCard 
-          label="Trabajos Vencidos" 
+          label="Actividades Vencidas" 
           value={kpis.vencidos} 
-          icon={<AlertTriangle size={24} className="text-red-500" />}
-          className="border-l-4 border-l-red-500"
+          icon={<AlertTriangle size={22} className="text-red-500" />}
+          className="border border-slate-100 bg-white hover:border-red-200 hover:shadow-md transition-all duration-200"
         />
         <StatCard 
-          label="Entregas Calificadas" 
+          label="Calificaciones Listas" 
           value={kpis.calificados} 
-          icon={<CheckSquare size={24} className="text-purple-600" />}
-          className="border-l-4 border-l-purple-600"
+          icon={<CheckSquare size={22} className="text-purple-600" />}
+          className="border border-slate-100 bg-white hover:border-purple-200 hover:shadow-md transition-all duration-200"
         />
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         {/* Left/Middle: Active Deliverables */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Calendar size={20} className="text-emerald-800" />
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <Calendar size={18} className="text-emerald-700" />
               <span>Entregables Activos y Pendientes</span>
             </h2>
-            <span className="text-xs text-gray-500 font-medium">Mostrando {activeDeliverables.length} actividades</span>
+            <span className="text-xs bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-full border border-slate-200">
+              {activeDeliverables.length} actividades
+            </span>
           </div>
 
           {activeDeliverables.length === 0 ? (
@@ -192,40 +202,40 @@ const PanelAlumno: React.FC = () => {
                 const isExpired = new Date(entregable.fecha_cierre_efectiva) < new Date();
                 
                 return (
-                  <Card key={entregable.id_entregable} className="p-5 hover:shadow-md transition duration-200">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="space-y-2 max-w-xl">
+                  <Card key={entregable.id_entregable} className="p-6 hover:shadow-md border border-slate-100 transition-all duration-200 bg-white rounded-2xl relative">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                      <div className="space-y-3 max-w-xl text-left">
                         {/* Course & Section */}
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                            {entregable.curso_codigo} - Sec. {entregable.curso_seccion}
+                          <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/50 uppercase tracking-wider">
+                            {entregable.curso_codigo} · Sec. {entregable.curso_seccion}
                           </span>
-                          <span className="text-xs text-gray-500 font-medium">{entregable.curso_nombre}</span>
+                          <span className="text-xs text-slate-500 font-bold">{entregable.curso_nombre}</span>
                         </div>
 
                         {/* Title & Description */}
                         <div>
-                          <h3 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                             {entregable.titulo}
                             {entregable.tiene_prorroga && (
-                              <span className="text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-200 px-1.5 py-0.25 rounded" title="Plazo extendido por el profesor">
-                                PRÓRROGA
+                              <span className="text-[9px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200/60 px-2 py-0.5 rounded uppercase tracking-wider">
+                                Prórroga
                               </span>
                             )}
                           </h3>
                           {entregable.descripcion && (
-                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{entregable.descripcion}</p>
+                            <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">{entregable.descripcion}</p>
                           )}
                         </div>
 
                         {/* Deadline details */}
-                        <div className="text-xs text-gray-400">
-                          Cierre: <span className="font-semibold text-gray-600">{formatInLimaTimezone(entregable.fecha_cierre_efectiva)}</span>
+                        <div className="text-xs text-slate-400 font-medium">
+                          Cierre: <span className="font-semibold text-slate-600">{formatInLimaTimezone(entregable.fecha_cierre_efectiva)}</span>
                         </div>
                       </div>
 
                       {/* Right Action side */}
-                      <div className="flex flex-col items-end justify-between min-w-[160px] gap-3">
+                      <div className="flex flex-col items-end justify-between min-w-[170px] gap-4">
                         {/* Countdown / Status badge */}
                         {!hasSubmission && !isExpired && (
                           <Countdown fechaCierre={entregable.fecha_cierre_efectiva} />
@@ -234,21 +244,19 @@ const PanelAlumno: React.FC = () => {
                         {hasSubmission && (
                           <Badge 
                             variant={entregable.estado_entrega === 'entregado_a_tiempo' ? 'success' : 'warning'}
-                            label={entregable.estado_entrega === 'entregado_a_tiempo' ? 'Entregado a Tiempo' : 'Entregado con Tardanza'}
+                            label={entregable.estado_entrega === 'entregado_a_tiempo' ? 'A Tiempo' : 'Tardía'}
                           />
                         )}
 
                         {!hasSubmission && isExpired && (
-                          <Badge variant="error" label="No Entregado / Cerrado" />
+                          <Badge variant="error" label="No Entregado" />
                         )}
 
                         {/* Action buttons */}
                         <div className="w-full flex justify-end">
                           {hasSubmission ? (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-xs flex items-center gap-1 text-emerald-800 hover:text-emerald-950 font-semibold"
+                            <button 
+                              className="text-xs flex items-center gap-1.5 text-emerald-700 hover:text-emerald-900 font-bold border border-emerald-200/50 hover:bg-emerald-50 px-3 py-2 rounded-xl transition duration-200"
                               onClick={() => handleVerConstanciaClick(
                                 entregable.entrega, 
                                 entregable.curso_nombre, 
@@ -256,27 +264,23 @@ const PanelAlumno: React.FC = () => {
                               )}
                             >
                               <FileText size={14} />
-                              <span>Ver Constancia</span>
-                            </Button>
+                              <span>Comprobante</span>
+                            </button>
                           ) : !isExpired || entregable.admite_extemporaneas ? (
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="w-full md:w-auto text-xs font-semibold px-4 py-2 flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800"
+                            <button
+                              className="w-full md:w-auto text-xs font-bold px-4 py-2.5 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-600/10 hover:shadow-lg transition duration-200"
                               onClick={() => handleEntregarClick(entregable)}
                             >
                               <span>Subir Trabajo</span>
                               <ArrowRight size={14} />
-                            </Button>
+                            </button>
                           ) : (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="w-full md:w-auto text-xs font-semibold cursor-not-allowed opacity-50"
+                            <button
+                              className="w-full md:w-auto text-xs font-bold py-2.5 px-4 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl cursor-not-allowed"
                               disabled
                             >
                               Cerrado
-                            </Button>
+                            </button>
                           )}
                         </div>
                       </div>
@@ -290,13 +294,13 @@ const PanelAlumno: React.FC = () => {
 
         {/* Right: Recently Graded */}
         <div className="space-y-6">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <FileCheck size={20} className="text-purple-600" />
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <FileCheck size={18} className="text-purple-600" />
             <span>Calificados Recientemente</span>
           </h2>
 
           {gradedDeliverables.length === 0 ? (
-            <div className="bg-white p-6 rounded-xl border text-center text-gray-500 text-sm">
+            <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-slate-400 text-sm font-semibold">
               No tienes calificaciones registradas en este periodo.
             </div>
           ) : (
@@ -304,31 +308,35 @@ const PanelAlumno: React.FC = () => {
               {gradedDeliverables.map((entregable) => {
                 const revision = entregable.entrega?.revision;
                 return (
-                  <Card key={entregable.id_entregable} className="p-4 border border-purple-100 hover:shadow-sm transition">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-start gap-2">
+                  <Card key={entregable.id_entregable} className="p-5 border border-purple-100 hover:border-purple-200 hover:shadow-md transition-all duration-200 bg-white rounded-2xl text-left">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start gap-4">
                         <div className="truncate">
-                          <h4 className="text-sm font-bold text-gray-900 truncate">{entregable.titulo}</h4>
-                          <span className="text-xs text-gray-400 font-semibold">{entregable.curso_codigo}</span>
+                          <h4 className="text-sm font-bold text-slate-800 truncate">{entregable.titulo}</h4>
+                          <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">{entregable.curso_codigo}</span>
                         </div>
-                        <div className="bg-purple-50 border border-purple-200 px-3 py-1 rounded-lg text-center shrink-0">
-                          <span className="block text-[10px] text-purple-700 uppercase font-bold tracking-wider">Nota</span>
-                          <span className="text-base font-bold text-purple-800 font-mono">
-                            {revision?.nota !== null && revision?.nota !== undefined ? String(revision.nota).padStart(2, '0') : 'NE'}
+                        
+                        {/* Grade Bubble */}
+                        <div className="bg-purple-50/80 border border-purple-200/50 px-3.5 py-1 rounded-xl text-center shrink-0">
+                          <span className="block text-[8px] text-purple-700 uppercase font-extrabold tracking-widest">Nota</span>
+                          <span className="text-lg font-black text-purple-800 font-mono">
+                            {revision?.nota !== null && revision?.nota !== undefined 
+                              ? String(revision.nota.toFixed(1)).padStart(4, '0') 
+                              : 'N/E'}
                           </span>
                         </div>
                       </div>
 
                       {revision?.retroalimentacion && (
-                        <div className="text-xs bg-slate-50 p-2.5 rounded border italic text-gray-600">
+                        <div className="text-xs bg-slate-50 border border-slate-100 p-3 rounded-xl italic text-slate-600 leading-relaxed">
                           &ldquo;{revision.retroalimentacion}&rdquo;
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center text-[10px] text-gray-400">
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium border-t border-slate-50 pt-3">
                         <span>Evaluado: {revision?.fecha_evaluacion ? formatInLimaTimezone(revision.fecha_evaluacion, 'date') : 'N/A'}</span>
                         <button 
-                          className="text-purple-700 hover:underline font-semibold"
+                          className="text-purple-700 hover:text-purple-950 font-bold"
                           onClick={() => handleVerConstanciaClick(
                             entregable.entrega, 
                             entregable.curso_nombre, 
@@ -345,6 +353,7 @@ const PanelAlumno: React.FC = () => {
             </div>
           )}
         </div>
+
       </div>
 
       {/* Modals */}

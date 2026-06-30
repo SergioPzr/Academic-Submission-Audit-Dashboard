@@ -89,101 +89,113 @@ const PanelAdmin: React.FC = () => {
   const maxPico = Math.max(...picos.map((p) => p.total), 1);
 
   return (
-    <div className="admin-panel">
+    <div className="space-y-8 animate-fade-in text-left">
+      
       {/* Header */}
-      <div className="admin-panel-header">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-100 pb-5">
         <div>
-          <h2 className="text-h2">Consola de Administración</h2>
-          <p className="text-subtitle">
-            Métricas globales del sistema SRE-URP · Universidad Ricardo Palma
+          <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Consola de Administración</h2>
+          <p className="text-xs text-slate-400 font-medium mt-1">
+            Métricas globales de infraestructura y auditoría del sistema SRE-URP
           </p>
         </div>
+        
         <button
-          className="btn btn-secondary btn-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition shadow-sm"
           onClick={fetchAll}
           disabled={loading}
-          title="Refrescar datos"
         >
-          <RefreshCw size={14} className={loading ? 'spin-icon' : ''} />
-          <span style={{ marginLeft: '0.5rem' }}>
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          <span>
             {loading ? 'Actualizando…' : `Actualizado ${formatDistanceToNow(lastRefresh, { locale: es, addSuffix: true })}`}
           </span>
         </button>
       </div>
 
       {error && (
-        <div className="admin-error-banner">
-          <AlertTriangle size={16} />
+        <div className="p-4 border border-red-200 bg-red-50 text-red-800 rounded-xl flex items-center gap-2 text-xs font-semibold">
+          <AlertTriangle size={16} className="text-red-600" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* KPI Cards */}
       {loading && !metricas ? (
-        <div className="admin-loading-center">
+        <div className="flex justify-center items-center h-96">
           <Spinner size="lg" />
         </div>
       ) : (
         <>
-          <div className="admin-kpi-grid">
+          {/* KPI Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StatCard
               label="Transacciones (24h)"
               value={metricas?.transacciones_24h.toLocaleString() ?? '—'}
-              icon={<Activity size={22} color="var(--color-accent)" />}
-              trend={{ value: 'Últimas 24h', isUpward: true }}
+              icon={<Activity size={22} className="text-emerald-500" />}
+              trend={{ value: 'Operaciones de auditoría', isUpward: true }}
+              className="bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-200"
             />
             <StatCard
-              label="Almacenamiento Total"
+              label="Espacio de Storage"
               value={metricas ? formatBytes(metricas.almacenamiento_bytes) : '—'}
-              icon={<HardDrive size={22} color="#3B82F6" />}
+              icon={<HardDrive size={22} className="text-blue-500" />}
+              trend={{ value: 'Bucket de entregas', isUpward: true }}
+              className="bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-200"
             />
             <StatCard
               label="Usuarios Activos"
               value={metricas?.usuarios_activos.toLocaleString() ?? '—'}
-              icon={<Users size={22} color="var(--color-success)" />}
+              icon={<Users size={22} className="text-emerald-700" />}
+              trend={{ value: 'Cuentas habilitadas', isUpward: true }}
+              className="bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-200"
             />
             <StatCard
-              label="Incidencias Críticas (24h)"
+              label="Incidencias (24h)"
               value={metricas?.incidencias_criticas.toLocaleString() ?? '—'}
-              icon={<AlertTriangle size={22} color="var(--color-error)" />}
+              icon={<AlertTriangle size={22} className="text-red-500" />}
               trend={
                 metricas && metricas.incidencias_criticas > 0
-                  ? { value: 'Revisar auditoría', isUpward: false }
-                  : undefined
+                  ? { value: 'Acción requerida', isUpward: false }
+                  : { value: 'Sin incidencias', isUpward: true }
               }
+              className="bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-200"
             />
           </div>
 
-          {/* Charts Row */}
-          <div className="admin-charts-row">
-            {/* Transaction Chart */}
-            <div className="card admin-chart-card">
-              <div className="admin-chart-header">
+          {/* Charts & Stats Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Transaction Chart Card */}
+            <div className="lg:col-span-2 bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-50 pb-3">
                 <div>
-                  <h3 className="text-h3">Volumen de Transacciones</h3>
-                  <p className="text-subtitle">Últimos 14 días · desde logs_auditoria</p>
+                  <h3 className="text-base font-bold text-slate-800">Volumen de Actividad</h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Historial de logs de auditoría (14 días)</p>
                 </div>
-                <TrendingUp size={20} color="var(--color-accent)" />
+                <TrendingUp size={20} className="text-emerald-500" />
               </div>
-              <GraficoTransacciones datos={grafico} dias={14} />
+              
+              <div className="w-full">
+                <GraficoTransacciones datos={grafico} dias={14} />
+              </div>
             </div>
 
-            {/* Side column */}
-            <div className="admin-side-col">
-              {/* Distribución por rol */}
-              <div className="card admin-side-card">
-                <h3 className="text-h3" style={{ marginBottom: '1rem' }}>
-                  Distribución por Rol
+            {/* Right Column (Sidebar metrics) */}
+            <div className="flex flex-col gap-6">
+              
+              {/* Role Distribution Card */}
+              <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4">
+                <h3 className="text-sm font-bold text-slate-800 border-b border-slate-50 pb-3">
+                  Distribución de Usuarios
                 </h3>
                 {roles.length === 0 ? (
-                  <p className="text-subtitle">Sin datos</p>
+                  <p className="text-xs text-slate-400 font-semibold py-4 text-center">Sin datos de usuarios</p>
                 ) : (
-                  <div className="distribucion-roles">
+                  <div className="space-y-4">
                     {roles.map((r) => (
-                      <div key={r.nombre} className="distribucion-item">
-                        <div className="distribucion-label">
-                          <span className="distribucion-nombre">{r.nombre}</span>
-                          <span className="distribucion-count">{r.cantidad}</span>
+                      <div key={r.nombre} className="space-y-2">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-slate-700 capitalize">{r.nombre}</span>
+                          <span className="text-slate-500">{r.cantidad}</span>
                         </div>
                         <div className="distribucion-bar-track">
                           <div
@@ -197,21 +209,21 @@ const PanelAdmin: React.FC = () => {
                 )}
               </div>
 
-              {/* Pico de carga */}
-              <div className="card admin-side-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                  <Clock size={16} color="var(--color-warning)" />
-                  <h3 className="text-h3">Pico de Carga (7d)</h3>
+              {/* Load Peaks Card */}
+              <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-50 pb-3">
+                  <Clock size={16} className="text-amber-500" />
+                  <h3 className="text-sm font-bold text-slate-800">Picos de Carga (7d)</h3>
                 </div>
                 {picos.length === 0 ? (
-                  <p className="text-subtitle">Sin datos suficientes</p>
+                  <p className="text-xs text-slate-400 font-semibold py-4 text-center">Sin datos suficientes</p>
                 ) : (
-                  <div className="picos-carga">
+                  <div className="space-y-4">
                     {picos.slice(0, 4).map((p) => (
-                      <div key={p.hora} className="pico-item">
-                        <div className="pico-label">
-                          <span className="pico-hora">{formatHora(p.hora)}</span>
-                          <span className="pico-total">{p.total} ops</span>
+                      <div key={p.hora} className="space-y-2">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-slate-700">{formatHora(p.hora)}</span>
+                          <span className="text-slate-500">{p.total} operaciones</span>
                         </div>
                         <div className="distribucion-bar-track">
                           <div
@@ -224,51 +236,53 @@ const PanelAdmin: React.FC = () => {
                   </div>
                 )}
               </div>
+
             </div>
           </div>
 
-          {/* Recent Audit Logs */}
-          <div className="card" style={{ marginTop: '1.5rem' }}>
-            <div className="admin-table-header">
+          {/* Recent Audit Logs Table */}
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-50 pb-3">
               <div>
-                <h3 className="text-h3">Log de Auditoría Reciente</h3>
-                <p className="text-subtitle">Últimas 10 operaciones del sistema</p>
+                <h3 className="text-base font-bold text-slate-800">Auditoría en Tiempo Real</h3>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">Últimas 10 operaciones críticas del sistema</p>
               </div>
-              <a href="/admin/auditoria" className="btn btn-ghost btn-sm">
-                Ver todo →
+              <a href="/admin/auditoria" className="text-xs font-bold text-emerald-700 hover:text-emerald-900 border border-emerald-100 hover:bg-emerald-50 px-3 py-1.5 rounded-xl transition">
+                Ver todo log →
               </a>
             </div>
-            <div style={{ overflowX: 'auto' }}>
-              <table className="admin-table">
-                <thead>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-100 text-xs">
+                <thead className="bg-slate-50/50">
                   <tr>
-                    <th>USUARIO</th>
-                    <th>OPERACIÓN</th>
-                    <th>TABLA</th>
-                    <th>IP</th>
-                    <th>CUANDO</th>
+                    <th className="px-6 py-3 text-left font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
+                    <th className="px-6 py-3 text-left font-bold text-slate-400 uppercase tracking-wider">Operación</th>
+                    <th className="px-6 py-3 text-left font-bold text-slate-400 uppercase tracking-wider">Tabla</th>
+                    <th className="px-6 py-3 text-left font-bold text-slate-400 uppercase tracking-wider">Dirección IP</th>
+                    <th className="px-6 py-3 text-left font-bold text-slate-400 uppercase tracking-wider">Fecha / Hora</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white divide-y divide-slate-100">
                   {logs.length === 0 ? (
                     <tr>
-                      <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
+                      <td colSpan={5} className="text-center py-8 text-slate-400 font-semibold">
                         Sin registros de auditoría
                       </td>
                     </tr>
                   ) : (
                     logs.map((log) => (
-                      <tr key={log.id_log}>
-                        <td className="admin-td-email">{log.email_usuario ?? '—'}</td>
-                        <td>
+                      <tr key={log.id_log} className="hover:bg-slate-50/30 transition-colors">
+                        <td className="px-6 py-4 font-bold text-slate-700 max-w-[200px] truncate">{log.email_usuario ?? '—'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <Badge
                             label={log.tipo_operacion}
                             variant={getBadgeVariant(log.tipo_operacion)}
                           />
                         </td>
-                        <td>{log.tabla_afectada ?? '—'}</td>
-                        <td>{log.ip_cliente ?? '—'}</td>
-                        <td className="admin-td-time">
+                        <td className="px-6 py-4 whitespace-nowrap text-slate-500 font-medium">{log.tabla_afectada ?? '—'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-slate-500 font-mono">{log.ip_cliente ?? '—'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-slate-400 font-semibold">
                           {formatDistanceToNow(new Date(log.timestamp_servidor), {
                             locale: es,
                             addSuffix: true,
@@ -283,6 +297,7 @@ const PanelAdmin: React.FC = () => {
           </div>
         </>
       )}
+
     </div>
   );
 };

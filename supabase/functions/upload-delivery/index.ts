@@ -7,195 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-// OAuth2 Google JWT helper
-async function signJwt(clientEmail: string, privateKeyPem: string, scope: string) {
-  const pemHeader = "-----BEGIN PRIVATE KEY-----";
-  const pemFooter = "-----END PRIVATE KEY-----";
-  const pemContents = privateKeyPem
-    .replace(pemHeader, "")
-    .replace(pemFooter, "")
-    .replace(/\s+/g, "");
-
-  const binaryDerString = atob(pemContents);
-  const binaryDer = new Uint8Array(binaryDerString.length);
-  for (let i = 0; i < binaryDerString.length; i++) {
-    binaryDer[i] = binaryDerString.charCodeAt(i);
-  }
-
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    binaryDer.buffer,
-    {
-      name: "RSASSA-PKCS1-v1_5",
-      hash: "SHA-256",
-    },
-    false,
-    ["sign"]
-  );
-
-  const header = { alg: "RS256", typ: "JWT" };
-  const now = Math.floor(Date.now() / 1000);
-  const payload = {
-    iss: clientEmail,
-    scope: scope,
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now,
-  };
-
-  const encoder = new TextEncoder();
-  const headerBase64 = btoa(JSON.stringify(header))
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-  const payloadBase64 = btoa(JSON.stringify(payload))
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-
-  const signData = encoder.encode(`${headerBase64}.${payloadBase64}`);
-  const signature = await crypto.subtle.sign(
-    "RSASSA-PKCS1-v1_5",
-    key,
-    signData
-  );
-
-  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-
-  return `${headerBase64}.${payloadBase64}.${signatureBase64}`;
-}
-
-async function getGoogleAccessToken(clientEmail: string, privateKeyPem: string) {
-  const jwt = await signJwt(clientEmail, privateKeyPem, "https://www.googleapis.com/auth/drive");
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwt,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to get Google Access Token: ${await response.text()}`);
-  }
-
-  const data = await response.json();
-  return data.access_token;
-}
-
-async function findOrCreateFolder(token: string, name: string, parentId: string): Promise<string> {
-  const q = `mimeType = 'application/vnd.google-apps.folder' and name = '${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and trashed = false`;
-  const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`;
-
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Error searching folder ${name}: ${await response.text()}`);
-  }
-
-  const data = await response.json();
-  if (data.files && data.files.length > 0) {
-    return data.files[0].id;
-  }
-
-  const createUrl = "https://www.googleapis.com/drive/v3/files?fields=id";
-  const createResponse = await fetch(createUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: name,
-      mimeType: "application/vnd.google-apps.folder",
-      parents: [parentId],
-    }),
-  });
-
-  if (!createResponse.ok) {
-    throw new Error(`Error creating folder ${name}: ${await createResponse.text()}`);
-  }
-
-  const folder = await createResponse.json();
-  return folder.id;
-}
-
-async function shareFileWithAnyone(token: string, fileId: string): Promise<void> {
-  const url = `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      role: "reader",
-      type: "anyone",
-    }),
-  });
-
-  if (!response.ok) {
-    console.error(`Warning: Failed to share file ${fileId} with anyone: ${await response.text()}`);
-  }
-}
-
-async function uploadFileToDrive(
-  token: string,
-  fileName: string,
-  mimeType: string,
-  fileData: ArrayBuffer,
-  folderId: string
-): Promise<string> {
-  const boundary = "foo_bar_baz_boundary";
-
-  const metadata = {
-    name: fileName,
-    parents: [folderId],
-  };
-
-  const parts = [
-    `--${boundary}\r\n`,
-    `Content-Type: application/json; charset=UTF-8\r\n\r\n`,
-    JSON.stringify(metadata),
-    `\r\n--${boundary}\r\n`,
-    `Content-Type: ${mimeType || "application/octet-stream"}\r\n\r\n`,
-    fileData,
-    `\r\n--${boundary}--\r\n`
-  ];
-
-  const blob = new Blob(parts);
-
-  const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink";
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": `multipart/related; boundary=${boundary}`,
-    },
-    body: blob,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Error uploading file to Drive: ${await response.text()}`);
-  }
-
-  const result = await response.json();
-  const fileId = result.id;
-
-  // Make the file readable by anyone with the link
-  await shareFileWithAnyone(token, fileId);
-
-  return result.webViewLink || `https://drive.google.com/open?id=${fileId}`;
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -335,42 +146,43 @@ Deno.serve(async (req: Request) => {
       })
     }
 
-    // 6. Handle Google Drive Upload or Fallback Mock
-    const googleEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL')?.replace(/^["']|["']$/g, '')
-    const googleKey = Deno.env.get('GOOGLE_PRIVATE_KEY')?.replace(/^["']|["']$/g, '')?.replace(/\\n/g, '\n')
-    const googleRootId = Deno.env.get('GOOGLE_DRIVE_ROOT_FOLDER_ID')?.replace(/^["']|["']$/g, '')
+    // 6. Handle Supabase Storage Upload instead of Google Drive (fixes storage quota issue)
+    const { data: studentPerfil } = await supabaseAdmin
+      .from('usuarios')
+      .select('nombre_completo')
+      .eq('id', idAlumno)
+      .single()
 
-    let driveUrl = ''
+    const studentName = studentPerfil?.nombre_completo || `Alumno_${idAlumno}`
+    const courseName = (entregable.cursos as any)?.nombre || `Curso_${idCurso}`
 
-    if (googleEmail && googleKey && googleRootId) {
-      // Authenticate with Google
-      const token = await getGoogleAccessToken(googleEmail, googleKey)
+    // Sanitize names for storage path
+    const cleanCourse = courseName.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const cleanTask = entregable.titulo.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const cleanStudent = studentName.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const cleanFile = file.name.replace(/[^a-zA-Z0-9-_.]/g, '_')
 
-      // Get student's details
-      const { data: studentPerfil } = await supabaseAdmin
-        .from('usuarios')
-        .select('nombre_completo')
-        .eq('id', idAlumno)
-        .single()
+    const storagePath = `${idCurso}/${cleanTask}/${cleanStudent}/${cleanFile}`
 
-      const studentName = studentPerfil?.nombre_completo || `Alumno_${idAlumno}`
-      const courseName = (entregable.cursos as any)?.nombre || `Curso_${idCurso}`
+    const { error: uploadError } = await supabaseAdmin
+      .storage
+      .from('entregas')
+      .upload(storagePath, fileBuffer, {
+        contentType: file.type || 'application/octet-stream',
+        upsert: true
+      })
 
-      // Find or create course folder
-      const courseFolderId = await findOrCreateFolder(token, courseName, googleRootId)
-
-      // Find or create deliverable folder
-      const taskFolderId = await findOrCreateFolder(token, entregable.titulo, courseFolderId)
-
-      // Find or create student folder
-      const studentFolderId = await findOrCreateFolder(token, studentName, taskFolderId)
-
-      // Upload file
-      driveUrl = await uploadFileToDrive(token, file.name, file.type, fileBuffer, studentFolderId)
-    } else {
-      console.warn('Google credentials are not set. Generating mock Drive link.')
-      driveUrl = `https://drive.google.com/mock-file-id/${crypto.randomUUID()}`
+    if (uploadError) {
+      throw new Error(`Error al subir a Supabase Storage: ${uploadError.message}`)
     }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabaseAdmin
+      .storage
+      .from('entregas')
+      .getPublicUrl(storagePath)
+
+    const driveUrl = publicUrl
 
     const constanciaId = crypto.randomUUID()
 

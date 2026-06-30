@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
 import { authService } from '../../services/authService';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import { Mail, Lock, Shield } from 'lucide-react';
+import { Mail, Lock, Shield, ArrowRight } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -17,29 +16,34 @@ const Login: React.FC = () => {
   // Statistics state
   const [stats, setStats] = useState({
     entregas: '12.4k',
-    disponibilidad: '98.7%',
+    disponibilidad: '99.9%',
     cursos: '320'
   });
 
-  // const navigate = useNavigate();
+  // Check for pre-registration errors (e.g., OAuth block)
+  useEffect(() => {
+    const authError = sessionStorage.getItem('sre_auth_error');
+    if (authError) {
+      setError(authError);
+      sessionStorage.removeItem('sre_auth_error');
+    }
+  }, []);
 
   // Load stats from database
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Query entregas count
         const { count: entregasCount } = await supabase
           .from('entregas')
           .select('*', { count: 'exact', head: true });
 
-        // Query cursos count
         const { count: cursosCount } = await supabase
           .from('cursos')
           .select('*', { count: 'exact', head: true });
 
         setStats({
           entregas: entregasCount && entregasCount > 0 ? entregasCount.toLocaleString() : '12.4k',
-          disponibilidad: '99.9%', // Real-time server availability estimate
+          disponibilidad: '99.9%',
           cursos: cursosCount && cursosCount > 0 ? cursosCount.toString() : '320'
         });
       } catch (err) {
@@ -71,7 +75,7 @@ const Login: React.FC = () => {
     }
   }, []);
 
-  // Countdowns lockout state
+  // Countdown lockout state
   useEffect(() => {
     if (lockoutTime === null) return;
 
@@ -102,14 +106,13 @@ const Login: React.FC = () => {
       });
 
       if (authError) {
-        // Record failed attempt
         const nextAttempts = attempts + 1;
         setAttempts(nextAttempts);
         localStorage.setItem('sre_login_attempts', nextAttempts.toString());
         await authService.logAuthEvent(email, false, undefined, authError.message);
 
         if (nextAttempts >= 5) {
-          const until = Date.now() + 15 * 60 * 1000; // 15 minutes lockout
+          const until = Date.now() + 15 * 60 * 1000;
           setLockoutTime(until);
           localStorage.setItem('sre_lockout_until', until.toString());
           setError('Cuenta bloqueada temporalmente por 15 minutos debido a demasiados intentos fallidos.');
@@ -117,15 +120,10 @@ const Login: React.FC = () => {
           setError(`Credenciales inválidas. Intentos restantes: ${5 - nextAttempts}`);
         }
       } else if (data.user) {
-        // Reset attempts
         setAttempts(0);
         localStorage.removeItem('sre_login_attempts');
         localStorage.removeItem('sre_lockout_until');
-
-        // Log audit event
         await authService.logAuthEvent(email, true, data.user.id);
-
-        // Profile and role redirection is handled automatically by the Router / auth hook.
       }
     } catch (err: any) {
       setError(err.message || 'Error inesperado al iniciar sesión.');
@@ -139,7 +137,6 @@ const Login: React.FC = () => {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // Google authentication flow (restricted to @urp.edu.pe inside useAuth hook if needed)
           redirectTo: window.location.origin
         }
       });
@@ -158,60 +155,76 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      {/* Left Column (60%) */}
-      <div className="login-left">
-        <div className="login-left-logo">
-          <Shield size={24} style={{ color: 'var(--color-accent)' }} />
-          <span>SRE-URP</span>
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#0B1E14] text-slate-100 font-sans selection:bg-emerald-500 selection:text-white">
+      
+      {/* Left Column (Brand banner and statistics) */}
+      <div className="relative lg:w-3/5 p-8 lg:p-16 flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0D2A1C] via-[#081B11] to-[#040C07]">
+        {/* Glow Effects */}
+        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-80 h-80 rounded-full bg-emerald-700/10 blur-[100px] pointer-events-none" />
+
+        {/* Logo */}
+        <div className="flex items-center gap-3 text-lg font-bold tracking-wider text-emerald-400 z-10 animate-fade-in">
+          <div className="bg-emerald-950/60 p-2.5 rounded-xl border border-emerald-800/40 backdrop-blur-md">
+            <Shield size={24} className="text-emerald-400" />
+          </div>
+          <span className="font-extrabold text-white">SRE-URP</span>
         </div>
 
-        <div className="login-left-content">
-          <h1 className="login-left-title">
-            Sistema de Registro de Entregables Académicos
+        {/* Content Body */}
+        <div className="my-16 lg:my-auto max-w-2xl z-10 space-y-6">
+          <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+            Sistema de Registro de <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500">
+              Entregables Académicos
+            </span>
           </h1>
-          <p className="login-left-subtitle">
-            Plataforma institucional de la Universidad Ricardo Palma para la entrega, revisión y auditoría inmutable de entregables académicos.
+          <p className="text-base lg:text-lg text-slate-300 font-medium leading-relaxed max-w-xl">
+            Plataforma institucional de la Universidad Ricardo Palma para la gestión, control y auditoría inmutable de entregas en la nube.
           </p>
 
-          <div className="login-left-stats">
-            <div>
-              <div className="login-stat-value">{stats.entregas}</div>
-              <div className="login-stat-label">Entregas Registradas</div>
+          {/* Stats Badges */}
+          <div className="grid grid-cols-3 gap-6 pt-10 border-t border-emerald-900/40 max-w-lg">
+            <div className="space-y-1">
+              <span className="block text-2xl lg:text-3xl font-extrabold text-white">{stats.entregas}</span>
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest">Entregas</span>
             </div>
-            <div>
-              <div className="login-stat-value">{stats.disponibilidad}</div>
-              <div className="login-stat-label">Disponibilidad del Sistema</div>
+            <div className="space-y-1">
+              <span className="block text-2xl lg:text-3xl font-extrabold text-white">{stats.disponibilidad}</span>
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest">Uptime</span>
             </div>
-            <div>
-              <div className="login-stat-value">{stats.cursos}</div>
-              <div className="login-stat-label">Cursos Activos</div>
+            <div className="space-y-1">
+              <span className="block text-2xl lg:text-3xl font-extrabold text-white">{stats.cursos}</span>
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest">Cursos</span>
             </div>
           </div>
         </div>
 
-        <div className="text-subtitle" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
-          © {new Date().getFullYear()} Universidad Ricardo Palma. Todos los derechos reservados.
+        {/* Footer */}
+        <div className="text-xs text-slate-400 font-medium z-10">
+          © {new Date().getFullYear()} Universidad Ricardo Palma. Coordinación de Arquitectura de Software.
         </div>
       </div>
 
-      {/* Right Column (40%) */}
-      <div className="login-right">
-        <div className="login-card">
-          <h2 className="login-card-title">Iniciar sesión</h2>
-          <p className="login-card-subtitle">
-            Accede al sistema con tus credenciales institucionales
-          </p>
+      {/* Right Column (Login form area) */}
+      <div className="lg:w-2/5 p-6 lg:p-12 flex items-center justify-center bg-slate-900">
+        <div className="w-full max-w-md bg-slate-800/40 border border-slate-700/40 backdrop-blur-xl p-8 lg:p-10 rounded-2xl shadow-2xl flex flex-col space-y-6">
+          
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-white tracking-tight">Iniciar sesión</h2>
+            <p className="text-sm text-slate-400">
+              Usa tus credenciales oficiales de la universidad.
+            </p>
+          </div>
 
-          {/* Google OAuth */}
+          {/* Google Login Button */}
           <button
             type="button"
-            className="oauth-button"
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 font-semibold py-3 px-4 rounded-xl border border-slate-200 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 active:scale-[0.98] disabled:opacity-50"
             onClick={handleGoogleLogin}
             disabled={!!lockoutTime || loading}
           >
-            {/* Google Icon */}
-            <svg width="20" height="20" viewBox="0 0 24 24">
+            <svg width="20" height="20" viewBox="0 0 24 24" className="shrink-0">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -232,65 +245,75 @@ const Login: React.FC = () => {
             <span>Iniciar con Google</span>
           </button>
 
-          <div className="divider-container">
-            <div className="divider-line"></div>
-            <div className="divider-text">O CON CREDENCIALES</div>
-            <div className="divider-line"></div>
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-2">
+            <div className="flex-1 h-[1px] bg-slate-700/60" />
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">o con contraseña</span>
+            <div className="flex-1 h-[1px] bg-slate-700/60" />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleCredentialLogin}>
-            <Input
-              label="Correo electrónico"
-              type="email"
-              placeholder="correo@urp.edu.pe"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={!!lockoutTime || loading}
-              icon={<Mail size={16} />}
-            />
+          <form onSubmit={handleCredentialLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Email institucional</label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-slate-500"><Mail size={18} /></span>
+                <input
+                  type="email"
+                  placeholder="ejemplo@urp.edu.pe"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={!!lockoutTime || loading}
+                  className="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200"
+                />
+              </div>
+            </div>
 
-            <Input
-              label="Contraseña"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={!!lockoutTime || loading}
-              icon={<Lock size={16} />}
-            />
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Contraseña</label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-slate-500"><Lock size={18} /></span>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={!!lockoutTime || loading}
+                  className="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200"
+                />
+              </div>
+            </div>
 
             {error && (
-              <div
-                className="input-error-msg"
-                style={{
-                  textAlign: 'left',
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  padding: '0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  marginBottom: '1rem'
-                }}
-              >
-                {error}
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3.5 text-xs text-red-400 leading-relaxed font-semibold">
+                <span>{error}</span>
                 {lockoutTime && (
-                  <div>Tiempo restante: {getLockoutRemainingMinutes()} min</div>
+                  <span className="block mt-1 font-bold">Intenta de nuevo en: {getLockoutRemainingMinutes()} min</span>
                 )}
               </div>
             )}
 
-            <Button
+            <button
               type="submit"
-              className="w-full mt-4"
-              loading={loading}
-              disabled={!!lockoutTime}
+              disabled={!!lockoutTime || loading}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-emerald-900/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Iniciar sesión
-            </Button>
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Ingresar a la Plataforma</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
           </form>
+
         </div>
       </div>
+
     </div>
   );
 };

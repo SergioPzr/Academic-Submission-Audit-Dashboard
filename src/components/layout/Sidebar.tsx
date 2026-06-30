@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import NavItem from './NavItem';
-import { LogOut } from 'lucide-react';
+import { LogOut, Shield } from 'lucide-react';
 
 const NAV_ITEMS = {
   alumno: [
@@ -24,15 +24,21 @@ const NAV_ITEMS = {
 
 const Sidebar: React.FC = () => {
   const { rol, signOut } = useAuth();
-
   const items = rol && NAV_ITEMS[rol] ? NAV_ITEMS[rol] : [];
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <span>SRE-URP</span>
+    <aside className="w-[260px] bg-[#0A1F14] text-slate-300 flex flex-col h-screen shrink-0 border-r border-emerald-950/40 select-none">
+      
+      {/* Sidebar Logo / Header */}
+      <div className="h-[70px] border-b border-emerald-950/40 px-6 flex items-center gap-3">
+        <div className="bg-emerald-900/40 p-2 rounded-lg border border-emerald-800/30">
+          <Shield className="text-emerald-400 w-5 h-5" />
+        </div>
+        <span className="font-extrabold text-white tracking-widest text-lg">SRE-URP</span>
       </div>
-      <nav className="sidebar-nav">
+
+      {/* Navigation Links */}
+      <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
         {items.map((item) => (
           <NavItem
             key={item.path}
@@ -42,24 +48,18 @@ const Sidebar: React.FC = () => {
           />
         ))}
       </nav>
-      <div className="sidebar-footer">
+
+      {/* Footer / Log out */}
+      <div className="p-4 border-t border-emerald-950/40 bg-[#07170E]/30">
         <button
           onClick={signOut}
-          className="btn btn-ghost w-full"
-          style={{ color: 'rgba(255, 255, 255, 0.7)', justifyContent: 'flex-start', padding: '0.75rem 1rem', gap: '0.75rem' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-            e.currentTarget.style.color = '#ffffff';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-          }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border border-transparent font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 active:scale-[0.98]"
         >
-          <LogOut size={20} />
+          <LogOut size={18} className="rotate-180" />
           <span>Cerrar sesión</span>
         </button>
       </div>
+
     </aside>
   );
 };

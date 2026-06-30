@@ -151,7 +151,7 @@ const ModalEntrega: React.FC<ModalEntregaProps> = ({ isOpen, onClose, entregable
               <input
                 ref={fileInputRef}
                 type="file"
-                className="hidden"
+                style={{ display: 'none' }}
                 onChange={handleFileChange}
               />
               <Upload size={36} className={`mb-3 ${dragActive ? 'text-emerald-500' : 'text-gray-400'}`} />
