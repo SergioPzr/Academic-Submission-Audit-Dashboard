@@ -19,6 +19,7 @@ export interface AlumnoCalificacion {
       nota: number | null;
       retroalimentacion: string | null;
       fecha_evaluacion: string | null;
+      modificaciones_count?: number;
     } | null;
   } | null;
   estado_calificacion: 'No Entregado' | 'Entregado' | 'Calificado' | 'Tardío';
@@ -56,7 +57,8 @@ export async function getEntregasPorEntregable(
         id_revision,
         nota,
         retroalimentacion,
-        fecha_evaluacion
+        fecha_evaluacion,
+        modificaciones_count
       )
     `)
     .eq('id_entregable', idEntregable);
@@ -102,9 +104,10 @@ export async function getEntregasPorEntregable(
             revision: revision
               ? {
                   id_revision: revision.id_revision,
-                  nota: revision.nota ? Number(revision.nota) : null,
+                  nota: (revision.nota !== null && revision.nota !== undefined) ? Number(revision.nota) : null,
                   retroalimentacion: revision.retroalimentacion,
                   fecha_evaluacion: revision.fecha_evaluacion,
+                  modificaciones_count: revision.modificaciones_count ? Number(revision.modificaciones_count) : 0,
                 }
               : null,
           }

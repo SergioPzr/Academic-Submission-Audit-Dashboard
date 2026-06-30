@@ -30,6 +30,9 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
   const [error, setError] = useState<string | null>(null);
 
   const isEditing = !!student.entrega?.revision;
+  const modificacionesCount = student.entrega?.revision?.modificaciones_count || 0;
+  const attemptsLeft = Math.max(0, 3 - modificacionesCount);
+  const isEditingDisabled = isEditing && attemptsLeft <= 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -50,6 +53,11 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
     e.preventDefault();
     if (!student.entrega) return;
     if (!user?.id) return;
+
+    if (isEditingDisabled) {
+      setError('Límite de modificaciones alcanzado (3/3)');
+      return;
+    }
 
     const notaNum = parseFloat(nota);
     if (isNaN(notaNum) || notaNum < 0 || notaNum > 20) {
@@ -77,10 +85,10 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="card max-w-md w-full p-6 animate-fade-in bg-white rounded-lg shadow-lg">
+    <div className="modal-overlay" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}>
+      <div className="card max-w-md w-full p-6 animate-fade-in bg-white rounded-lg shadow-lg border">
         <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <h3 className="text-xl font-bold text-primary-dark">
+          <h3 className="text-xl font-bold text-gray-900">
             {isEditing ? 'Modificar Calificación' : 'Evaluar Entrega'}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -94,7 +102,28 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
           </div>
         )}
 
-        <div className="mb-4 bg-gray-50 p-3 rounded text-sm text-gray-700 space-y-1">
+        {isEditing && (
+          <div className="text-xs font-semibold text-gray-500 mb-3 bg-gray-50 p-2 rounded border flex justify-between items-center">
+            <span>Modificaciones realizadas: <span className="font-bold text-gray-800">{modificacionesCount}/3</span></span>
+            {attemptsLeft > 0 ? (
+              <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                {attemptsLeft} intentos restantes
+              </span>
+            ) : (
+              <span className="text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                Límite alcanzado
+              </span>
+            )}
+          </div>
+        )}
+
+        {isEditingDisabled && (
+          <div className="bg-amber-50 text-amber-800 p-3 rounded mb-4 text-xs font-medium border border-amber-200">
+            ⚠️ Límite de modificaciones alcanzado (3 de 3). Solo se permite visualizar la calificación.
+          </div>
+        )}
+
+        <div className="mb-4 bg-gray-50 p-3 rounded text-sm text-gray-700 space-y-1 border">
           <p><strong>Alumno:</strong> {student.nombre_completo}</p>
           <p><strong>Código:</strong> {student.codigo_institucional || '---'}</p>
           {student.entrega && (
@@ -130,17 +159,17 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             required
-            disabled={loading}
+            disabled={loading || isEditingDisabled}
           />
 
           <div className="input-group">
-            <label className="input-label">Retroalimentación / Comentarios</label>
+            <label className="input-label font-semibold text-sm text-gray-700">Retroalimentación / Comentarios</label>
             <textarea
-              className="input-field min-h-[100px] py-2"
+              className="input-field min-h-[100px] py-2 border rounded-lg w-full p-2.5 mt-1 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700"
               placeholder="Escriba aquí los comentarios de la evaluación..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              disabled={loading}
+              disabled={loading || isEditingDisabled}
               maxLength={500}
             />
             <div className="text-right text-[10px] text-gray-400 mt-1">
@@ -152,7 +181,7 @@ const ModalEvaluar: React.FC<ModalEvaluarProps> = ({ isOpen, onClose, onSuccess,
             <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" loading={loading}>
+            <Button type="submit" variant="primary" loading={loading} disabled={isEditingDisabled}>
               Guardar Nota
             </Button>
           </div>

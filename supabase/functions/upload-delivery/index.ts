@@ -156,46 +156,22 @@ async function uploadFileToDrive(
 ): Promise<string> {
   const boundary = "foo_bar_baz_boundary";
 
-  const metadataPart = [
-    `--${boundary}`,
-    `Content-Type: application/json; charset=UTF-8`,
-    ``,
-    JSON.stringify({
-      name: fileName,
-      parents: [folderId],
-    }),
-    ``,
-  ].join("\r\n");
+  const metadata = {
+    name: fileName,
+    parents: [folderId],
+  };
 
-  const mediaPartHeader = [
-    `--${boundary}`,
-    `Content-Type: ${mimeType || "application/octet-stream"}`,
-    ``,
-    ``,
-  ].join("\r\n");
+  const parts = [
+    `--${boundary}\r\n`,
+    `Content-Type: application/json; charset=UTF-8\r\n\r\n`,
+    JSON.stringify(metadata),
+    `\r\n--${boundary}\r\n`,
+    `Content-Type: ${mimeType || "application/octet-stream"}\r\n\r\n`,
+    fileData,
+    `\r\n--${boundary}--\r\n`
+  ];
 
-  const mediaPartFooter = `\r\n--${boundary}--\r\n`;
-
-  const encoder = new TextEncoder();
-  const metadataBytes = encoder.encode(metadataPart);
-  const mediaHeaderBytes = encoder.encode(mediaPartHeader);
-  const mediaFooterBytes = encoder.encode(mediaPartFooter);
-
-  const payload = new Uint8Array(
-    metadataBytes.byteLength +
-    mediaHeaderBytes.byteLength +
-    fileData.byteLength +
-    mediaFooterBytes.byteLength
-  );
-
-  let offset = 0;
-  payload.set(metadataBytes, offset);
-  offset += metadataBytes.byteLength;
-  payload.set(mediaHeaderBytes, offset);
-  offset += mediaHeaderBytes.byteLength;
-  payload.set(new Uint8Array(fileData), offset);
-  offset += fileData.byteLength;
-  payload.set(mediaFooterBytes, offset);
+  const blob = new Blob(parts);
 
   const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink";
   const response = await fetch(uploadUrl, {
@@ -203,9 +179,8 @@ async function uploadFileToDrive(
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": `multipart/related; boundary=${boundary}`,
-      "Content-Length": payload.byteLength.toString(),
     },
-    body: payload,
+    body: blob,
   });
 
   if (!response.ok) {

@@ -27,6 +27,7 @@ export interface EntregableConEstado {
       nota: number | null;
       retroalimentacion: string | null;
       fecha_evaluacion: string | null;
+      modificaciones_count?: number;
     } | null;
   } | null;
   estado_entrega: 'pendiente' | 'entregado_a_tiempo' | 'entregado_tardio' | 'vencido' | 'calificado';
@@ -48,6 +49,7 @@ export interface EntregaHistorial {
   revision?: {
     nota: number | null;
     retroalimentacion: string | null;
+    modificaciones_count?: number;
   } | null;
 }
 
@@ -111,7 +113,8 @@ export async function getEntregablesActivos(idAlumno: string): Promise<Entregabl
           id_revision,
           nota,
           retroalimentacion,
-          fecha_evaluacion
+          fecha_evaluacion,
+          modificaciones_count
         )
       )
     `)
@@ -169,9 +172,10 @@ export async function getEntregablesActivos(idAlumno: string): Promise<Entregabl
         constancia_id: entrega.constancia_id,
         revision: revision ? {
           id_revision: revision.id_revision,
-          nota: revision.nota ? Number(revision.nota) : null,
+          nota: (revision.nota !== null && revision.nota !== undefined) ? Number(revision.nota) : null,
           retroalimentacion: revision.retroalimentacion,
-          fecha_evaluacion: revision.fecha_evaluacion
+          fecha_evaluacion: revision.fecha_evaluacion,
+          modificaciones_count: revision.modificaciones_count ? Number(revision.modificaciones_count) : 0
         } : null
       } : null,
       estado_entrega: estado
@@ -202,7 +206,8 @@ export async function getHistorialEntregas(idAlumno: string): Promise<EntregaHis
       ),
       revisiones (
         nota,
-        retroalimentacion
+        retroalimentacion,
+        modificaciones_count
       )
     `)
     .eq('id_alumno', idAlumno)
@@ -227,8 +232,9 @@ export async function getHistorialEntregas(idAlumno: string): Promise<EntregaHis
     curso_nombre: item.entregables?.cursos?.nombre || '',
     curso_seccion: item.entregables?.cursos?.seccion || '',
     revision: item.revisiones?.[0] ? {
-      nota: item.revisiones[0].nota ? Number(item.revisiones[0].nota) : null,
-      retroalimentacion: item.revisiones[0].retroalimentacion
+      nota: (item.revisiones[0].nota !== null && item.revisiones[0].nota !== undefined) ? Number(item.revisiones[0].nota) : null,
+      retroalimentacion: item.revisiones[0].retroalimentacion,
+      modificaciones_count: item.revisiones[0].modificaciones_count ? Number(item.revisiones[0].modificaciones_count) : 0
     } : null
   }));
 }
@@ -262,7 +268,21 @@ export async function subirEntrega(
   });
 
   if (error) {
-    throw new Error(error.message || 'Error al subir la entrega a través de la Edge Function');
+    let errorMsg = 'Error al subir la entrega a través de la Edge Function';
+    if (error.context) {
+      try {
+        const body = await error.context.json();
+        if (body && body.message) {
+          errorMsg = body.message;
+        }
+      } catch (_) {
+        try {
+          const text = await error.context.text();
+          if (text) errorMsg = text;
+        } catch (__) {}
+      }
+    }
+    throw new Error(errorMsg);
   }
 
   return data;
