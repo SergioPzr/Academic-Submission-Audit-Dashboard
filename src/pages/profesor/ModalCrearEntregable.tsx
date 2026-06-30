@@ -168,7 +168,7 @@ const ModalCrearEntregable: React.FC<ModalCrearEntregableProps> = ({
 
   return (
     <div className="modal-overlay">
-      <div className="card max-w-md w-full p-6 animate-fade-in bg-white rounded-lg shadow-lg">
+      <div className="modal-box p-6 max-w-md" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4 border-b pb-2">
           <h3 className="text-xl font-bold text-primary-dark">
             {entregableAEditar ? 'Editar Entregable' : 'Crear Entregable'}

@@ -63,9 +63,9 @@ const PanelAlumno: React.FC = () => {
     
     loadData();
 
-    // Set up Realtime subscription on 'entregas' table (synchronized with 'revisiones' via db trigger)
-    const entregasSubscription = supabase
-      .channel('alumno-dashboard-realtime')
+    // Suscripción 1: Cambios en 'entregas' del alumno (nueva entrega, reemplazo)
+    const entregasChannel = supabase
+      .channel('alumno-entregas-realtime')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'entregas', filter: `id_alumno=eq.${perfil.id}` },
@@ -76,8 +76,22 @@ const PanelAlumno: React.FC = () => {
       )
       .subscribe();
 
+    // Suscripción 2: Cambios en 'revisiones' (calificaciones de profesores)
+    const revisionesChannel = supabase
+      .channel('alumno-revisiones-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'revisiones' },
+        () => {
+          console.log('Realtime change detected in revisiones, reloading data...');
+          loadData();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(entregasSubscription);
+      supabase.removeChannel(entregasChannel);
+      supabase.removeChannel(revisionesChannel);
     };
   }, [perfil?.id, loadData]);
 
