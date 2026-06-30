@@ -67,10 +67,10 @@ const CursoCard: React.FC<CursoCardProps> = ({ curso }) => {
         {/* Matriculados count (Clickable) */}
         <button
           onClick={() => setAlumnosModalOpen(true)}
-          className="flex items-center text-xs font-semibold mb-4 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/50 px-2.5 py-1.5 -ml-1 rounded-xl transition duration-200 border border-transparent hover:border-emerald-100/50"
+          className="flex items-center gap-2 text-xs font-bold mb-4 bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80 border border-emerald-100/60 px-3 py-1.5 rounded-xl transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
           title="Ver lista de alumnos matriculados"
         >
-          <Users size={14} className="mr-1.5 text-slate-400" />
+          <Users size={14} className="text-emerald-600" />
           <span>{total_alumnos} {total_alumnos === 1 ? 'estudiante' : 'estudiantes'}</span>
         </button>
 
