@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
@@ -32,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [perfil, setPerfil] = useState<UserPerfil | null>(null);
   const [rol, setRol] = useState<'alumno' | 'profesor' | 'administrador' | null>(null);
   const [loading, setLoading] = useState(true);
+  const lastUserIdRef = useRef<string | null>(null);
 
   const fetchPerfil = async (userId: string) => {
     try {
@@ -63,6 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        lastUserIdRef.current = session.user.id;
         fetchPerfil(session.user.id).then(() => setLoading(false));
       } else {
         setLoading(false);
@@ -70,15 +72,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, newSession: any) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, newSession: any) => {
       setSession(newSession);
-      setUser(newSession?.user ?? null);
+      const newUser = newSession?.user ?? null;
+      setUser(newUser);
       
-      if (newSession?.user) {
+      if (newUser) {
+        // Evitar recarga de UI y refetch si el usuario ya está cargado y no ha cambiado
+        if (lastUserIdRef.current === newUser.id) {
+          return;
+        }
+        lastUserIdRef.current = newUser.id;
         setLoading(true);
-        await fetchPerfil(newSession.user.id);
+        await fetchPerfil(newUser.id);
         setLoading(false);
       } else {
+        lastUserIdRef.current = null;
         setPerfil(null);
         setRol(null);
         setLoading(false);
