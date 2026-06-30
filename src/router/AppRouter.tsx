@@ -21,6 +21,7 @@ import CronogramaProfesor from '../pages/profesor/CronogramaProfesor';
 // Admin Pages
 import PanelAdmin from '../pages/admin/PanelAdmin';
 import UsuariosCursos from '../pages/admin/UsuariosCursos';
+import LogAuditoria from '../pages/admin/LogAuditoria';
 
 // Route Guards
 const ProtectedRoute: React.FC<{
@@ -102,13 +103,7 @@ const RootRedirect: React.FC = () => {
   return <Navigate to={rol ? homePaths[rol] : '/login'} replace />;
 };
 
-// Dummy Subpage Placeholders to prevent broken sidebar clicks
-const DummyPage: React.FC<{ title: string }> = ({ title }) => (
-  <div>
-    <h2 className="text-h2 mb-6">{title}</h2>
-    <p className="text-subtitle">Esta sección se encuentra planificada para módulos posteriores.</p>
-  </div>
-);
+
 
 const AppRouter: React.FC = () => {
   return (
@@ -216,7 +211,7 @@ const AppRouter: React.FC = () => {
             path="/admin/auditoria"
             element={
               <ProtectedRoute allowedRoles={['administrador']}>
-                <DummyPage title="Bitácora de Auditoría Inmutable" />
+                <LogAuditoria />
               </ProtectedRoute>
             }
           />

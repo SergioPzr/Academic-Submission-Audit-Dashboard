@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, UserPlus, Info, Copy, Eye, EyeOff } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import Spinner from '../../components/ui/Spinner';
 import { supabase } from '../../services/supabase';
-import { getProfesores } from '../../services/adminService';
 
 interface FormCrearUsuarioProps {
   onClose: () => void;

@@ -81,13 +81,13 @@ export interface FilaCSVValidada extends FilaCSV {
 // ─── Métricas Globales ─────────────────────────────────────────────────────────
 
 export async function getMetricasGlobales(): Promise<MetricasAdmin> {
-  const { data, error } = await supabase.rpc('get_admin_metrics');
+  const { data, error } = await (supabase as any).rpc('get_admin_metrics');
   if (error) throw error;
   return data as MetricasAdmin;
 }
 
 export async function getTransaccionesGrafico(dias = 14): Promise<PuntoGrafico[]> {
-  const { data, error } = await supabase.rpc('get_transacciones_grafico', { p_dias: dias });
+  const { data, error } = await (supabase as any).rpc('get_transacciones_grafico', { p_dias: dias });
   if (error) throw error;
   return (data as any[]).map((d) => ({ fecha: d.fecha, total: Number(d.total) }));
 }
