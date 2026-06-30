@@ -135,23 +135,48 @@ async function uploadFileToDrive(
   fileData: ArrayBuffer,
   folderId: string
 ): Promise<string> {
-  const metadata = {
-    name: fileName,
-    parents: [folderId],
-  };
+  const boundary = "foo_bar_baz_boundary";
 
-  const boundary = "-------314159265358979323846";
-  const delimiter = `\r\n--${boundary}\r\n`;
-  const closeDelimiter = `\r\n--${boundary}--`;
+  const metadataPart = [
+    `--${boundary}`,
+    `Content-Type: application/json; charset=UTF-8`,
+    ``,
+    JSON.stringify({
+      name: fileName,
+      parents: [folderId],
+    }),
+    ``,
+  ].join("\r\n");
+
+  const mediaPartHeader = [
+    `--${boundary}`,
+    `Content-Type: ${mimeType || "application/octet-stream"}`,
+    ``,
+    ``,
+  ].join("\r\n");
+
+  const mediaPartFooter = `\r\n--${boundary}--\r\n`;
 
   const encoder = new TextEncoder();
-  const headerBytes = encoder.encode(delimiter + `Content-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` + delimiter + `Content-Type: ${mimeType}\r\n\r\n`);
-  const footerBytes = encoder.encode(closeDelimiter);
+  const metadataBytes = encoder.encode(metadataPart);
+  const mediaHeaderBytes = encoder.encode(mediaPartHeader);
+  const mediaFooterBytes = encoder.encode(mediaPartFooter);
 
-  const payload = new Uint8Array(headerBytes.length + fileData.byteLength + footerBytes.length);
-  payload.set(headerBytes, 0);
-  payload.set(new Uint8Array(fileData), headerBytes.length);
-  payload.set(footerBytes, headerBytes.length + fileData.byteLength);
+  const payload = new Uint8Array(
+    metadataBytes.byteLength +
+    mediaHeaderBytes.byteLength +
+    fileData.byteLength +
+    mediaFooterBytes.byteLength
+  );
+
+  let offset = 0;
+  payload.set(metadataBytes, offset);
+  offset += metadataBytes.byteLength;
+  payload.set(mediaHeaderBytes, offset);
+  offset += mediaHeaderBytes.byteLength;
+  payload.set(new Uint8Array(fileData), offset);
+  offset += fileData.byteLength;
+  payload.set(mediaFooterBytes, offset);
 
   const uploadUrl = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink";
   const response = await fetch(uploadUrl, {
@@ -313,7 +338,7 @@ Deno.serve(async (req: Request) => {
 
     // 6. Handle Google Drive Upload or Fallback Mock
     const googleEmail = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_EMAIL')
-    const googleKey = Deno.env.get('GOOGLE_PRIVATE_KEY')
+    const googleKey = Deno.env.get('GOOGLE_PRIVATE_KEY')?.replace(/\\n/g, '\n')
     const googleRootId = Deno.env.get('GOOGLE_DRIVE_ROOT_FOLDER_ID')
 
     let driveUrl = ''
