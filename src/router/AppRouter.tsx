@@ -9,6 +9,8 @@ import Login from '../pages/auth/Login';
 
 // Student Pages
 import PanelAlumno from '../pages/alumno/PanelAlumno';
+import HistorialAlumno from '../pages/alumno/HistorialAlumno';
+import CronogramaAlumno from '../pages/alumno/CronogramaAlumno';
 
 // Professor Pages
 import MisCursosProfesor from '../pages/profesor/MisCursosProfesor';
@@ -142,7 +144,7 @@ const AppRouter: React.FC = () => {
             path="/alumno/historial"
             element={
               <ProtectedRoute allowedRoles={['alumno']}>
-                <DummyPage title="Historial de Entregas" />
+                <HistorialAlumno />
               </ProtectedRoute>
             }
           />
@@ -150,7 +152,7 @@ const AppRouter: React.FC = () => {
             path="/alumno/cronograma"
             element={
               <ProtectedRoute allowedRoles={['alumno']}>
-                <DummyPage title="Cronograma del Estudiante" />
+                <CronogramaAlumno />
               </ProtectedRoute>
             }
           />

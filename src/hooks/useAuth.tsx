@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
 export interface UserPerfil {
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, newSession: any) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       

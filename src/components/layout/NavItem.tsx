@@ -15,7 +15,7 @@ const NavItem: React.FC<NavItemProps> = ({ label, path, icon }) => {
   return (
     <NavLink
       to={path}
-      className={({ isActive }) => `nav-item ${isActive ? 'nav-item-active' : ''}`}
+      className={({ isActive }: { isActive: boolean }) => `nav-item ${isActive ? 'nav-item-active' : ''}`}
       // Avoid false active matches for root paths by setting end for exact matches
       end={path === '/alumno' || path === '/profesor' || path === '/admin'}
     >

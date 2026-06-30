@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
 import { authService } from '../../services/authService';
 import Input from '../../components/ui/Input';
@@ -21,7 +21,7 @@ const Login: React.FC = () => {
     cursos: '320'
   });
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // Load stats from database
   useEffect(() => {
