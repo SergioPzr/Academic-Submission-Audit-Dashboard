@@ -405,7 +405,7 @@ const CalificacionProfesor: React.FC = () => {
             >
               {cursos.map(c => (
                 <option key={c.id_curso} value={c.id_curso}>
-                  {c.codigo} - Sec. {c.seccion}
+                  {c.codigo.trim()} - {c.nombre} (Sec. {c.seccion.trim()})
                 </option>
               ))}
             </select>
@@ -566,9 +566,15 @@ const CalificacionProfesor: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-xs font-bold">
                         {isGraded && score !== null && score !== undefined ? (
-                          <span className="text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/50 font-bold font-mono">
-                            {score.toFixed(1)}
-                          </span>
+                          score < 11 ? (
+                            <span className="text-red-700 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200/55 font-bold font-mono">
+                              {score.toFixed(1)}
+                            </span>
+                          ) : (
+                            <span className="text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/50 font-bold font-mono">
+                              {score.toFixed(1)}
+                            </span>
+                          )
                         ) : (
                           <span className="text-slate-400 font-medium">---</span>
                         )}

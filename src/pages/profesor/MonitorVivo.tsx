@@ -301,7 +301,7 @@ const MonitorVivo: React.FC = () => {
             >
               {cursos.map(c => (
                 <option key={c.id_curso} value={c.id_curso}>
-                  {c.codigo} - {c.seccion}
+                  {c.codigo.trim()} - {c.nombre} (Sec. {c.seccion.trim()})
                 </option>
               ))}
             </select>
