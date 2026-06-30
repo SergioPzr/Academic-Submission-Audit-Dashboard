@@ -118,24 +118,55 @@ const GraficoTransacciones: React.FC<GraficoTransaccionesProps> = ({ datos, dias
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
             />
-            {hoveredIdx === i && (
-              <g>
-                <rect
-                  x={p.x - 42}
-                  y={p.y - 38}
-                  width={84}
-                  height={28}
-                  rx={6}
-                  fill="#1A3D2B"
-                />
-                <text x={p.x} y={p.y - 21} textAnchor="middle" fontSize={10} fill="#fff" fontWeight={600}>
-                  {p.total} ops
-                </text>
-                <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize={9} fill="rgba(255,255,255,0.7)">
-                  {p.fecha}
-                </text>
-              </g>
-            )}
+            {hoveredIdx === i && (() => {
+              const tooltipW = 84;
+              const tooltipH = 28;
+              
+              // Horizontal alignment: clamp within PAD.left and W - PAD.right
+              let tooltipX = p.x - tooltipW / 2;
+              if (tooltipX < PAD.left) {
+                tooltipX = PAD.left;
+              } else if (tooltipX + tooltipW > W - PAD.right) {
+                tooltipX = W - PAD.right - tooltipW;
+              }
+
+              // Vertical alignment: if too close to the top boundary (p.y - 38 < 5), display below the point
+              const showBelow = (p.y - 38) < 5;
+              const tooltipY = showBelow ? p.y + 12 : p.y - 38;
+
+              return (
+                <g>
+                  <rect
+                    x={tooltipX}
+                    y={tooltipY}
+                    width={tooltipW}
+                    height={tooltipH}
+                    rx={6}
+                    fill="#1A3D2B"
+                  />
+                  <text
+                    x={tooltipX + tooltipW / 2}
+                    y={showBelow ? tooltipY + 11 : tooltipY + 12}
+                    textAnchor="middle"
+                    fontSize={9}
+                    fill="#fff"
+                    fontWeight={600}
+                  >
+                    {p.total} ops
+                  </text>
+                  <text
+                    x={tooltipX + tooltipW / 2}
+                    y={showBelow ? tooltipY + 22 : tooltipY + 23}
+                    textAnchor="middle"
+                    fontSize={8}
+                    fill="rgba(255,255,255,0.7)"
+                    fontWeight={500}
+                  >
+                    {p.fecha}
+                  </text>
+                </g>
+              );
+            })()}
           </g>
         ))}
 

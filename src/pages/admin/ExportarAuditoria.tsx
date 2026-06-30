@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 import { exportarLogsCSV, type FiltrosAuditoria } from '../../services/auditService';
+import Button from '../../components/ui/Button';
 
 interface ExportarAuditoriaProps {
   filtros: FiltrosAuditoria;
@@ -50,22 +51,18 @@ const ExportarAuditoria: React.FC<ExportarAuditoriaProps> = ({
   const isDisabled = totalLogs === 0 || exporting;
 
   return (
-    <button
+    <Button
       onClick={handleExport}
       disabled={isDisabled}
-      className="btn btn-primary"
-      style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '0.5rem',
-        opacity: isDisabled ? 0.6 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer'
-      }}
+      loading={exporting}
+      variant="primary"
+      size="sm"
+      icon={<Download size={14} />}
       title={totalLogs === 0 ? 'No existen registros para exportar' : 'Exportar log de auditoría'}
+      className="ml-4"
     >
-      <Download size={16} />
-      <span>{exporting ? 'Exportando...' : '↓ Exportar CSV/Excel'}</span>
-    </button>
+      <span>Exportar CSV/Excel</span>
+    </Button>
   );
 };
 

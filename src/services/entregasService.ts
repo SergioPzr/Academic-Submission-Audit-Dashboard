@@ -296,3 +296,49 @@ export async function getServerTime(): Promise<Date> {
   }
   return new Date(data as string);
 }
+
+// 6. Get enrolled courses for a student
+export interface CursoMatriculado {
+  id_curso: string;
+  codigo: string;
+  nombre: string;
+  seccion: string;
+  ciclo_academico: string;
+  docente_nombre: string | null;
+}
+
+export async function getCursosMatriculadosAlumno(idAlumno: string): Promise<CursoMatriculado[]> {
+  const { data, error } = await supabase
+    .from('matriculas')
+    .select(`
+      id_curso,
+      cursos (
+        id_curso,
+        codigo,
+        nombre,
+        seccion,
+        ciclo_academico,
+        usuarios (
+          nombre_completo
+        )
+      )
+    `)
+    .eq('id_alumno', idAlumno);
+
+  if (error || !data) {
+    console.error('Error fetching enrolled courses:', error);
+    return [];
+  }
+
+  return data.map((item: any) => {
+    const curso = item.cursos;
+    return {
+      id_curso: curso.id_curso,
+      codigo: curso.codigo,
+      nombre: curso.nombre,
+      seccion: curso.seccion,
+      ciclo_academico: curso.ciclo_academico,
+      docente_nombre: curso.usuarios?.nombre_completo || 'Sin asignar'
+    };
+  });
+}

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import type { CursoConStats } from '../../services/cursosService';
 import { formatInLimaTimezone } from '../../utils/dateUtils';
 import { Calendar, Users, BarChart2, Activity } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import ModalAlumnosCurso from './ModalAlumnosCurso';
 
 interface CursoCardProps {
   curso: CursoConStats;
@@ -13,6 +14,7 @@ interface CursoCardProps {
 const CursoCard: React.FC<CursoCardProps> = ({ curso }) => {
   const navigate = useNavigate();
   const { id_curso, codigo, nombre, seccion, total_alumnos, proximo_entregable, stats } = curso;
+  const [alumnosModalOpen, setAlumnosModalOpen] = useState(false);
 
   // SVG Circular Progress calculation
   const radius = 24;
@@ -62,11 +64,15 @@ const CursoCard: React.FC<CursoCardProps> = ({ curso }) => {
           </div>
         </div>
 
-        {/* Matriculados count */}
-        <div className="flex items-center text-xs text-slate-400 font-semibold mb-4">
-          <Users size={14} className="mr-1.5 text-slate-300" />
+        {/* Matriculados count (Clickable) */}
+        <button
+          onClick={() => setAlumnosModalOpen(true)}
+          className="flex items-center text-xs font-semibold mb-4 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/50 px-2.5 py-1.5 -ml-1 rounded-xl transition duration-200 border border-transparent hover:border-emerald-100/50"
+          title="Ver lista de alumnos matriculados"
+        >
+          <Users size={14} className="mr-1.5 text-slate-400" />
           <span>{total_alumnos} {total_alumnos === 1 ? 'estudiante' : 'estudiantes'}</span>
-        </div>
+        </button>
 
         {/* Mini stats grid */}
         <div className="grid grid-cols-4 gap-2 mb-4 text-center">
@@ -179,6 +185,15 @@ const CursoCard: React.FC<CursoCardProps> = ({ curso }) => {
           </Button>
         </div>
       </div>
+
+      <ModalAlumnosCurso
+        isOpen={alumnosModalOpen}
+        onClose={() => setAlumnosModalOpen(false)}
+        idCurso={id_curso}
+        cursoNombre={nombre}
+        cursoCodigo={codigo}
+        cursoSeccion={seccion}
+      />
     </Card>
   );
 };

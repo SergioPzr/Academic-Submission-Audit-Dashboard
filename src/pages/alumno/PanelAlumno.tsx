@@ -3,8 +3,10 @@ import { useAuth } from '../../hooks/useAuth';
 import { 
   getKPIsAlumno, 
   getEntregablesActivos, 
+  getCursosMatriculadosAlumno,
   type EntregableConEstado, 
-  type AlumnoKPIs 
+  type AlumnoKPIs,
+  type CursoMatriculado
 } from '../../services/entregasService';
 import { formatInLimaTimezone } from '../../utils/dateUtils';
 import { supabase } from '../../services/supabase';
@@ -34,6 +36,7 @@ const PanelAlumno: React.FC = () => {
   const { perfil } = useAuth();
   const [kpis, setKpis] = useState<AlumnoKPIs>({ activos: 0, urgentes: 0, vencidos: 0, calificados: 0 });
   const [entregables, setEntregables] = useState<EntregableConEstado[]>([]);
+  const [cursosMatriculados, setCursosMatriculados] = useState<CursoMatriculado[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
   // Modals state
@@ -45,12 +48,14 @@ const PanelAlumno: React.FC = () => {
   const loadData = useCallback(async () => {
     if (!perfil?.id) return;
     try {
-      const [kpiData, entregablesData] = await Promise.all([
+      const [kpiData, entregablesData, cursosData] = await Promise.all([
         getKPIsAlumno(perfil.id),
-        getEntregablesActivos(perfil.id)
+        getEntregablesActivos(perfil.id),
+        getCursosMatriculadosAlumno(perfil.id)
       ]);
       setKpis(kpiData);
       setEntregables(entregablesData);
+      setCursosMatriculados(cursosData);
     } catch (err) {
       console.error('Error loading student dashboard data:', err);
     } finally {
@@ -306,12 +311,49 @@ const PanelAlumno: React.FC = () => {
           )}
         </div>
 
-        {/* Right: Recently Graded */}
-        <div className="space-y-6">
-          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <FileCheck size={18} className="text-purple-600" />
-            <span>Calificados Recientemente</span>
-          </h2>
+        {/* Right column: Enrolled Courses & Recently Graded */}
+        <div className="space-y-8">
+          
+          {/* Section: Enrolled Courses */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <BookOpen size={18} className="text-emerald-700" />
+              <span>Mis Cursos Matriculados</span>
+            </h2>
+
+            {cursosMatriculados.length === 0 ? (
+              <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-slate-450 text-sm font-semibold">
+                No estás matriculado en ninguna asignatura.
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {cursosMatriculados.map((c) => (
+                  <Card key={c.id_curso} className="p-4 border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all duration-200 bg-white rounded-2xl text-left">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-800">{c.nombre}</span>
+                        <Badge label={c.seccion} variant="neutral" />
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-semibold">
+                        <span>Código: <span className="text-slate-500 font-mono">{c.codigo}</span></span>
+                        <span>Ciclo: <span className="text-slate-500">{c.ciclo_academico}</span></span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-semibold border-t border-slate-50 pt-2">
+                        Docente: <strong className="text-slate-600">{c.docente_nombre}</strong>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right: Recently Graded */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <FileCheck size={18} className="text-purple-600" />
+              <span>Calificados Recientemente</span>
+            </h2>
 
           {gradedDeliverables.length === 0 ? (
             <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-slate-400 text-sm font-semibold">
@@ -369,6 +411,8 @@ const PanelAlumno: React.FC = () => {
         </div>
 
       </div>
+
+    </div>
 
       {/* Modals */}
       <ModalEntrega

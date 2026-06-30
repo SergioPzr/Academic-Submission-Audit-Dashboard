@@ -164,9 +164,21 @@ const MatriculaMasiva: React.FC = () => {
               </p>
               <p className="text-xs text-slate-400 font-medium mt-1">o haz click para seleccionarlo</p>
               
-              <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200/50 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 mt-6">
-                <FileText size={14} className="text-slate-400" />
-                <span>Columnas requeridas: <code className="text-emerald-800 font-bold font-mono text-[10px]">codigo, nombre, correo, curso, seccion</code></span>
+              <div className="flex flex-col sm:flex-row items-center gap-8 mt-6">
+                <a
+                  href={`data:text/csv;charset=utf-8,${encodeURIComponent("codigo,nombre,correo,curso,seccion\n202310111,Estudiante de Ejemplo,ejemplo@urp.edu.pe,IF-0712,IF-8A1\n")}`}
+                  download="plantilla_matricula.csv"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 active:scale-[0.98] bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm shadow-emerald-600/20 border border-transparent px-3 py-1.5 text-xs rounded-lg"
+                >
+                  <FileText size={14} />
+                  <span>Descargar Plantilla CSV</span>
+                </a>
+
+                <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200/50 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500">
+                  <FileText size={14} className="text-slate-400" />
+                  <span>Columnas requeridas: <code className="text-emerald-800 font-bold font-mono text-[10px]">codigo, nombre, correo, curso, seccion</code></span>
+                </div>
               </div>
             </div>
           )}

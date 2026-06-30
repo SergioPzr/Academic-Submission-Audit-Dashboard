@@ -224,3 +224,36 @@ export async function getKPIsProfesor(idProfesor: string): Promise<ProfesorKPIs>
     atrasos_detectados: atrasosDetectados,
   };
 }
+
+export interface AlumnoCurso {
+  id: string;
+  nombre_completo: string;
+  codigo_institucional: string | null;
+  email: string;
+  facultad: string | null;
+}
+
+export async function getAlumnosCurso(idCurso: string): Promise<AlumnoCurso[]> {
+  const { data, error } = await supabase
+    .from('matriculas')
+    .select(`
+      id_alumno,
+      usuarios (
+        id,
+        nombre_completo,
+        codigo_institucional,
+        email,
+        facultad
+      )
+    `)
+    .eq('id_curso', idCurso);
+
+  if (error || !data) {
+    console.error('Error fetching course students:', error);
+    return [];
+  }
+
+  return data
+    .map((item: any) => item.usuarios)
+    .filter((u: any) => u !== null) as AlumnoCurso[];
+}
