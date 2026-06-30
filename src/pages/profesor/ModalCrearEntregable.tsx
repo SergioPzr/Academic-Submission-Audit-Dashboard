@@ -191,10 +191,10 @@ const ModalCrearEntregable: React.FC<ModalCrearEntregableProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Course Selector */}
           {!idCurso && !entregableAEditar && cursosList.length > 0 && (
-            <div className="input-group">
-              <label className="input-label">Curso</label>
+            <div className="flex flex-col w-full text-left">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Curso</label>
               <select
-                className="input-field py-2 bg-white"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200"
                 value={cursoSeleccionado}
                 onChange={(e) => setCursoSeleccionado(e.target.value)}
                 disabled={loading}
@@ -218,10 +218,12 @@ const ModalCrearEntregable: React.FC<ModalCrearEntregableProps> = ({
             disabled={loading}
           />
 
-          <div className="input-group">
-            <label className="input-label">Descripción / Instrucciones</label>
+          <div className="flex flex-col w-full text-left">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
+              Descripción / Instrucciones
+            </label>
             <textarea
-              className="input-field min-h-[80px] py-2"
+              className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 min-h-[80px] resize-y"
               placeholder="Indique detalles o pautas para el alumno..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}

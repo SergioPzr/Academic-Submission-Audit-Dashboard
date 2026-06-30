@@ -78,7 +78,7 @@ export async function getEntregasPorEntregable(
   return (matriculas as any[]).map((m: any) => {
     const student = m.usuarios;
     const entrega = entregasMap[student.id] || null;
-    const revision = entrega?.revisiones?.[0] || null;
+    const revision = (Array.isArray(entrega?.revisiones) ? entrega.revisiones[0] : entrega?.revisiones) || null;
 
     let estado: AlumnoCalificacion['estado_calificacion'] = 'No Entregado';
     if (revision) {

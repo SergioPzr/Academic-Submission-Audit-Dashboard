@@ -201,7 +201,7 @@ const ModalProrrogaIndividual: React.FC<ModalProrrogaIndividualProps> = ({
               <div className="space-y-2">
                 <input
                   type="text"
-                  className="input-field"
+                  className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200"
                   placeholder="Buscar alumno por nombre o código..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}

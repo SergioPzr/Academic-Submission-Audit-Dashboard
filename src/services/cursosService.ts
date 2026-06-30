@@ -182,8 +182,8 @@ export async function getKPIsProfesor(idProfesor: string): Promise<ProfesorKPIs>
 
     if (entregas) {
       for (const entrega of entregas) {
-        const review = (entrega as any).revisiones?.[0];
-        if (!review || review.nota === null) {
+        const review = Array.isArray(entrega.revisiones) ? entrega.revisiones[0] : entrega.revisiones;
+        if (!review || (review as any).nota === null) {
           entregasPorRevisar++;
         }
         if (entrega.estado_puntualidad === 'Tardía') {

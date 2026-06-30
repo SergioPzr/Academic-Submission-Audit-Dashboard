@@ -136,7 +136,7 @@ export async function getEntregablesActivos(idAlumno: string): Promise<Entregabl
     const entrega = e.entregas?.find((ent: any) => ent.id_alumno === idAlumno);
 
     // Get the revision/grade if it exists
-    const revision = entrega?.revisiones?.[0] || null;
+    const revision = (Array.isArray(entrega?.revisiones) ? entrega.revisiones[0] : entrega?.revisiones) || null;
 
     // Determine delivery status
     let estado: EntregableConEstado['estado_entrega'] = 'pendiente';
@@ -231,10 +231,10 @@ export async function getHistorialEntregas(idAlumno: string): Promise<EntregaHis
     curso_codigo: item.entregables?.cursos?.codigo || '',
     curso_nombre: item.entregables?.cursos?.nombre || '',
     curso_seccion: item.entregables?.cursos?.seccion || '',
-    revision: item.revisiones?.[0] ? {
-      nota: (item.revisiones[0].nota !== null && item.revisiones[0].nota !== undefined) ? Number(item.revisiones[0].nota) : null,
-      retroalimentacion: item.revisiones[0].retroalimentacion,
-      modificaciones_count: item.revisiones[0].modificaciones_count ? Number(item.revisiones[0].modificaciones_count) : 0
+    revision: (Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones) ? {
+      nota: ((Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones).nota !== null && (Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones).nota !== undefined) ? Number((Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones).nota) : null,
+      retroalimentacion: (Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones).retroalimentacion,
+      modificaciones_count: (Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones).modificaciones_count ? Number((Array.isArray(item.revisiones) ? item.revisiones[0] : item.revisiones).modificaciones_count) : 0
     } : null
   }));
 }
