@@ -1,8 +1,8 @@
 ﻿<div align="center">
 
 # SRE-URP
-### Sistema de Registro de Entregables — Universidad Ricardo Palma
-### Academic Submission Registry System — Universidad Ricardo Palma
+### Sistema de Registro de Entregables - Universidad Ricardo Palma
+### Academic Submission Registry System - Universidad Ricardo Palma
 
 [![Status](https://img.shields.io/badge/status-in%20development-yellow?style=flat-square)](https://github.com/SergioPzr/Academic-Submission-Audit-Dashboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
@@ -21,9 +21,9 @@
 
 **SRE-URP** es un sistema web full-stack para la gestión y auditoría de entregas académicas en la Universidad Ricardo Palma. Resuelve un problema concreto: la ausencia de un mecanismo centralizado, temporalmente exacto e imparcial para registrar cuándo un estudiante entregó su trabajo.
 
-El sistema integra tres roles (Alumno, Profesor, Administrador), ventanas de entrega configurables con timestamps capturados exclusivamente del servidor, almacenamiento estructurado en Google Drive, calificación con retroalimentación y un log de auditoría inmutable a nivel de base de datos. Cada entrega es clasificada automáticamente como `"A Tiempo"` o `"Tardía"` según el reloj del servidor — no del cliente — con precisión de milisegundos.
+El sistema integra tres roles (Alumno, Profesor, Administrador), ventanas de entrega configurables con timestamps capturados exclusivamente del servidor, almacenamiento estructurado en Google Drive, calificación con retroalimentación y un log de auditoría inmutable a nivel de base de datos. Cada entrega es clasificada automáticamente como `"A Tiempo"` o `"Tardía"` según el reloj del servidor - no del cliente - con precisión de milisegundos.
 
-El proyecto fue desarrollado siguiendo **Spec-Driven Development (SDD)**, metodología obligatoria del curso de Arquitectura y Evolución de Software (URP, 2026-I): la especificación completa — requisitos funcionales, reglas de negocio, contratos de API y modelo de dominio — precede a cualquier línea de código de producción.
+El proyecto fue desarrollado siguiendo **Spec-Driven Development (SDD)**, metodología obligatoria del curso de Arquitectura y Evolución de Software (URP, 2026-I): la especificación completa - requisitos funcionales, reglas de negocio, contratos de API y modelo de dominio - precede a cualquier línea de código de producción.
 
 > **Estado actual:** El prototipo de frontend está funcional. La integración completa con Google Drive, la cobertura de pruebas y la documentación de ADRs están en curso.
 
@@ -33,9 +33,9 @@ El proyecto fue desarrollado siguiendo **Spec-Driven Development (SDD)**, metodo
 
 **SRE-URP** is a full-stack web system for managing and auditing academic assignment submissions at Universidad Ricardo Palma. It addresses a concrete problem: the lack of a centralized, temporally accurate, and impartial mechanism to record when a student submitted their work.
 
-The system integrates three roles (Student, Teacher, Administrator), configurable submission windows with timestamps captured exclusively server-side, structured storage in Google Drive, grading with feedback, and an immutable audit log enforced at the database level. Each submission is automatically classified as `"On Time"` or `"Late"` based on the server clock — not the client — with millisecond precision.
+The system integrates three roles (Student, Teacher, Administrator), configurable submission windows with timestamps captured exclusively server-side, structured storage in Google Drive, grading with feedback, and an immutable audit log enforced at the database level. Each submission is automatically classified as `"On Time"` or `"Late"` based on the server clock - not the client - with millisecond precision.
 
-The project was developed following **Spec-Driven Development (SDD)**, the mandatory methodology for the Software Architecture and Evolution course (URP, 2026-I): the full specification — functional requirements, business rules, API contracts, and domain model — precedes any production code.
+The project was developed following **Spec-Driven Development (SDD)**, the mandatory methodology for the Software Architecture and Evolution course (URP, 2026-I): the full specification - functional requirements, business rules, API contracts, and domain model - precedes any production code.
 
 > **Current status:** The frontend prototype is functional. Full Google Drive integration, test coverage, and ADR documentation are in progress.
 
@@ -115,7 +115,7 @@ The project was developed following **Spec-Driven Development (SDD)**, the manda
 
 ### Español
 
-> ⚠️ **TBD — La decisión arquitectónica formal está pendiente.** El sistema opera actualmente sobre una arquitectura de 3 capas sobre BaaS (Supabase), pero la elección de patrón definitivo será documentada en `docs/adr/` como parte del proceso SDD.
+> ⚠️ **TBD - La decisión arquitectónica formal está pendiente.** El sistema opera actualmente sobre una arquitectura de 3 capas sobre BaaS (Supabase), pero la elección de patrón definitivo será documentada en `docs/adr/` como parte del proceso SDD.
 
 **Candidatas en evaluación:**
 
@@ -149,7 +149,7 @@ React SPA (Vite + TypeScript)
 
 ### English
 
-> ⚠️ **TBD — The formal architectural decision is pending.** The system currently operates on a 3-layer BaaS (Supabase) architecture, but the definitive pattern will be documented in `docs/adr/` as part of the SDD process.
+> ⚠️ **TBD - The formal architectural decision is pending.** The system currently operates on a 3-layer BaaS (Supabase) architecture, but the definitive pattern will be documented in `docs/adr/` as part of the SDD process.
 
 **Candidates under evaluation:**
 
@@ -202,82 +202,9 @@ React SPA (Vite + TypeScript)
 | Linting | ESLint + typescript-eslint | 10.x / 8.x | ✅ Confirmed |
 
 ---
-
-## 5. Estructura del Proyecto / Project Structure
-
-### Español
-
-> ⚠️ La estructura de carpetas definitiva depende de la decisión arquitectónica final. La siguiente corresponde al estado actual del prototipo funcional.
-
-```
-SRE-URP/
-├── src/
-│   ├── components/          # Componentes UI reutilizables (Button, Badge, Card, Spinner...)
-│   ├── hooks/               # Custom hooks: useAuth, useCountdown, useRealtime...
-│   ├── pages/
-│   │   ├── admin/           # PanelAdmin, UsuariosCursos, ListaUsuarios, MatriculaMasiva,
-│   │   │                    # LogAuditoria, ModalMatricularIndividual, FormCrearCurso...
-│   │   ├── alumno/          # Dashboard alumno, vista de entregas y calificaciones
-│   │   ├── profesor/        # MisCursosProfesor, CronogramaProfesor, MonitorVivo,
-│   │   │                    # CalificacionProfesor, ModalCrearEntregable, ModalProrrogaIndividual...
-│   │   └── auth/            # Login
-│   ├── router/              # Definición de rutas protegidas por rol
-│   ├── services/            # Capa de acceso a datos: cursosService, entregablesService,
-│   │                        # adminService, entregasService...
-│   ├── types/               # Tipos TypeScript globales del dominio
-│   └── utils/               # dateUtils (zona horaria Lima), helpers
-├── supabase/
-│   ├── migrations/          # Migraciones SQL del esquema PostgreSQL
-│   └── functions/           # Edge Functions: upload-delivery, manage-schedule, bulk-enrollment...
-├── docs/                    # (planificado) ADRs, diagramas de arquitectura, OpenAPI spec
-│   └── adr/                 # Architecture Decision Records
-├── claude.md                # Especificación completa del sistema (fuente de verdad SDD)
-├── Modulos.md               # Documentación extendida de módulos
-├── package.json
-├── vite.config.ts
-└── tsconfig.app.json
-```
-
 ---
 
-### English
-
-> ⚠️ The definitive folder structure depends on the final architectural decision. The structure below corresponds to the current functional prototype.
-
-```
-SRE-URP/
-├── src/
-│   ├── components/          # Reusable UI components (Button, Badge, Card, Spinner...)
-│   ├── hooks/               # Custom hooks: useAuth, useCountdown, useRealtime...
-│   ├── pages/
-│   │   ├── admin/           # PanelAdmin, UsuariosCursos, ListaUsuarios, MatriculaMasiva,
-│   │   │                    # LogAuditoria, ModalMatricularIndividual, FormCrearCurso...
-│   │   ├── alumno/          # Student dashboard, submission and grading views
-│   │   ├── profesor/        # MisCursosProfesor, CronogramaProfesor, MonitorVivo,
-│   │   │                    # CalificacionProfesor, ModalCrearEntregable, ModalProrrogaIndividual...
-│   │   └── auth/            # Login
-│   ├── router/              # Role-protected route definitions
-│   ├── services/            # Data access layer: cursosService, entregablesService,
-│   │                        # adminService, entregasService...
-│   ├── types/               # Global domain TypeScript types
-│   └── utils/               # dateUtils (Lima timezone), helpers
-├── supabase/
-│   ├── migrations/          # PostgreSQL schema SQL migrations
-│   └── functions/           # Edge Functions: upload-delivery, manage-schedule, bulk-enrollment...
-├── docs/                    # (planned) ADRs, architecture diagrams, OpenAPI spec
-│   └── adr/                 # Architecture Decision Records
-├── claude.md                # Full system specification (SDD source of truth)
-├── Modulos.md               # Extended module documentation
-├── package.json
-├── vite.config.ts
-└── tsconfig.app.json
-```
-
----
-
-## 6. Modelo de Dominio / Domain Model
-
-> El modelo completo con relaciones está en [`claude.md §11`](claude.md).
+## 5. Modelo de Dominio / Domain Model
 
 | Entidad / Entity | Campos clave / Key Fields | Notas |
 |---|---|---|
@@ -298,11 +225,9 @@ SRE-URP/
 
 ---
 
-## 7. Documentación de API / API Documentation
+## 6. Documentación de API / API Documentation
 
 ### Español
-
-> ⚠️ **TBD — La especificación OpenAPI formal está pendiente de publicación en `docs/openapi.yaml`.** Los contratos completos con ejemplos de request/response están documentados en [`claude.md §10`](claude.md).
 
 | Endpoint | Método | Rol requerido | Descripción | Estado |
 |---|---|---|---|---|
@@ -324,8 +249,6 @@ SRE-URP/
 
 ### English
 
-> ⚠️ **TBD — The formal OpenAPI specification is pending publication at `docs/openapi.yaml`.** Full contracts with request/response examples are in [`claude.md §10`](claude.md).
-
 | Endpoint | Method | Required Role | Description | Status |
 |---|---|---|---|---|
 | `/auth/v1/token` | `POST` | Public | Login with email/password (Supabase Auth) | ✅ Active |
@@ -344,11 +267,11 @@ SRE-URP/
 
 ---
 
-## 8. Primeros Pasos / Getting Started
+## 7. Primeros Pasos / Getting Started
 
 ### Español
 
-> ⚠️ **TBD — Las instrucciones completas de despliegue (variables de entorno de Supabase, Service Account de Google Drive, migraciones de BD) se documentarán una vez que la integración esté completa.**
+> ⚠️ **TBD - Las instrucciones completas de despliegue (variables de entorno de Supabase, Service Account de Google Drive, migraciones de BD) se documentarán una vez que la integración esté completa.**
 
 **Para ejecutar el prototipo de frontend localmente:**
 
@@ -376,7 +299,7 @@ npm run dev
 
 ### English
 
-> ⚠️ **TBD — Full deployment instructions (Supabase environment variables, Google Drive Service Account, database migrations) will be documented once integration is complete.**
+> ⚠️ **TBD - Full deployment instructions (Supabase environment variables, Google Drive Service Account, database migrations) will be documented once integration is complete.**
 
 **Prerequisites:** Node.js ≥ 18 · npm ≥ 9
 
@@ -400,11 +323,11 @@ npm run dev
 
 ---
 
-## 9. Pruebas / Testing
+## 8. Pruebas / Testing
 
 ### Español
 
-> ⚠️ **TBD — El framework de pruebas no está confirmado.** Candidatos: Vitest (unitarias/integración) y Playwright (e2e). La selección se documentará en un ADR.
+> ⚠️ **TBD - El framework de pruebas no está confirmado.** Candidatos: Vitest (unitarias/integración) y Playwright (e2e). La selección se documentará en un ADR.
 
 SDD exige trazabilidad directa entre especificación y prueba: cada requisito funcional y contrato de operación debe tener al menos un caso de prueba referenciado.
 
@@ -421,7 +344,7 @@ SDD exige trazabilidad directa entre especificación y prueba: cada requisito fu
 
 ### English
 
-> ⚠️ **TBD — The testing framework is not yet confirmed.** Candidates: Vitest (unit/integration) and Playwright (e2e). Selection will be documented in an ADR.
+> ⚠️ **TBD - The testing framework is not yet confirmed.** Candidates: Vitest (unit/integration) and Playwright (e2e). Selection will be documented in an ADR.
 
 SDD mandates direct traceability between specification and test: each functional requirement and operation contract must have at least one referenced test case.
 
@@ -436,7 +359,7 @@ SDD mandates direct traceability between specification and test: each functional
 
 ---
 
-## 10. Spec-Driven Development (SDD)
+## 9. Spec-Driven Development (SDD)
 
 ### Español
 
@@ -444,7 +367,7 @@ Este proyecto aplica **Spec-Driven Development** como metodología de ingenierí
 
 **Aplicación concreta en SRE-URP:**
 
-1. **Especificación antes que código:** [`claude.md`](claude.md) contiene los 9 módulos, 53 requisitos funcionales (RF-01 a RF-53), 30 reglas de negocio (RN-001 a RN-030), contratos de API con payloads JSON, modelo de dominio completo y 12 escenarios de calidad — todo definido antes de escribir código de producción.
+1. **Especificación antes que código:** [`claude.md`](claude.md) contiene los 9 módulos, 53 requisitos funcionales (RF-01 a RF-53), 30 reglas de negocio (RN-001 a RN-030), contratos de API con payloads JSON, modelo de dominio completo y 12 escenarios de calidad - todo definido antes de escribir código de producción.
 
 2. **OpenAPI antes que el backend:** Los contratos de las Edge Functions están especificados con request/response completos en `claude.md §10`. La especificación formal en `docs/openapi.yaml` está planificada.
 
@@ -462,7 +385,7 @@ This project applies **Spec-Driven Development** as the mandatory engineering me
 
 **Concrete application in SRE-URP:**
 
-1. **Specification before code:** [`claude.md`](claude.md) contains all 9 modules, 53 functional requirements (RF-01 through RF-53), 30 business rules (RN-001 through RN-030), API contracts with JSON payloads, the complete domain model, and 12 quality scenarios — all defined before any production code.
+1. **Specification before code:** [`claude.md`](claude.md) contains all 9 modules, 53 functional requirements (RF-01 through RF-53), 30 business rules (RN-001 through RN-030), API contracts with JSON payloads, the complete domain model, and 12 quality scenarios - all defined before any production code.
 
 2. **OpenAPI before the backend:** Edge Function contracts are specified with complete request/response examples in `claude.md §10`. The formal specification in `docs/openapi.yaml` is planned.
 
@@ -474,9 +397,9 @@ This project applies **Spec-Driven Development** as the mandatory engineering me
 
 ---
 
-## 11. Equipo / Team
+## 10. Equipo / Team
 
-### Grupo 3 — Universidad Ricardo Palma
+### Grupo 3 - Universidad Ricardo Palma
 
 | Código / ID | Integrante / Member |
 |---|---|
@@ -489,7 +412,7 @@ This project applies **Spec-Driven Development** as the mandatory engineering me
 
 ---
 
-## 12. Contexto Académico / Academic Context
+## 11. Contexto Académico / Academic Context
 
 | Campo / Field | Detalle / Detail |
 |---|---|
@@ -497,37 +420,8 @@ This project applies **Spec-Driven Development** as the mandatory engineering me
 | **Facultad / Faculty** | Ingeniería — Ingeniería Informática / Engineering — Computer Science |
 | **Curso / Course** | Arquitectura y Evolución de Software / Software Architecture and Evolution |
 | **Ciclo académico / Academic term** | 2026-I · 7mo ciclo / 7th semester |
-| **Grupo / Group** | Grupo 3 de 6 / Group 3 of 6 |
 | **Tema asignado / Assigned topic** | Sistema de Registro de Entregables en Drive / Drive-based Assignment Submission System |
-| **Metodología / Methodology** | Spec-Driven Development (SDD) — obligatorio / mandatory |
-| **Herramientas / Tools** | Agentes de IA (uso obligatorio a petición del docente) / AI agents (mandatory per instructor) |
-| **Repositorio / Repository** | [github.com/SergioPzr/Academic-Submission-Audit-Dashboard](https://github.com/SergioPzr/Academic-Submission-Audit-Dashboard) |
+| **Metodología / Methodology** | Spec-Driven Development (SDD) |
+| **Herramientas / Tools** | Agentes de IA: Gemini.ai, claude.ai y antigravity IDE (uso obligatorio a petición del docente) / AI agents (mandatory per instructor) |
 
 ---
-
-## 13. Licencia / License
-
-### Español
-
-Este proyecto está distribuido bajo la **Licencia MIT**. El uso del código fuente es libre para fines académicos y de investigación. Consulta el archivo [LICENSE](LICENSE) para más detalles.
-
-> **Nota:** Este sistema procesa datos académicos de estudiantes. Cualquier despliegue en producción fuera del contexto académico original debe cumplir con la legislación de protección de datos aplicable (Ley N.° 29733, Perú).
-
----
-
-### English
-
-This project is distributed under the **MIT License**. Source code use is free for academic and research purposes. See the [LICENSE](LICENSE) file for details.
-
-> **Note:** This system processes student academic data. Any production deployment outside the original academic context must comply with applicable data protection legislation (Law No. 29733, Peru).
-
----
-
-<div align="center">
-
-**SRE-URP** · Universidad Ricardo Palma · Arquitectura y Evolución de Software · 2026-I
-Grupo 3 · Ingeniería Informática
-
-*Especificación completa en [`claude.md`](claude.md) · Full specification in [`claude.md`](claude.md)*
-
-</div>
