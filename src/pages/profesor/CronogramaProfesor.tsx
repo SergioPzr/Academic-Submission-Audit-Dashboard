@@ -234,9 +234,8 @@ const CronogramaProfesor: React.FC = () => {
           <p className="text-xs text-slate-400 font-medium mt-1">Crea, edita y visualiza entregables en tu calendario mensual.</p>
         </div>
 
-        {/* Selector de Curso */}
         <div className="flex items-center space-x-3 w-full md:w-auto">
-          <div className="flex flex-col w-full md:w-[240px]">
+          <div className="flex flex-col text-left">
             <span className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Filtrar por Curso</span>
             <select
               className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-bold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
@@ -245,7 +244,7 @@ const CronogramaProfesor: React.FC = () => {
             >
               {cursos.map(c => (
                 <option key={c.id_curso} value={c.id_curso}>
-                  {c.codigo} - {c.seccion} ({c.nombre})
+                  {c.codigo.trim()} - {c.nombre} (Sec. {c.seccion.trim()})
                 </option>
               ))}
             </select>

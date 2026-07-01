@@ -387,9 +387,8 @@ const CalificacionProfesor: React.FC = () => {
           </div>
         </div>
 
-        {/* Course & Deliverable selectors */}
         <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
-          <div className="flex flex-col w-full sm:w-[180px]">
+          <div className="flex flex-col text-left">
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">Curso</span>
             <select
               className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 transition cursor-pointer"
@@ -411,7 +410,7 @@ const CalificacionProfesor: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex flex-col w-full sm:w-[220px]">
+          <div className="flex flex-col text-left">
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">Entregable</span>
             <select
               className="bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 transition cursor-pointer"

@@ -103,9 +103,9 @@ const LogAuditoria: React.FC = () => {
       {/* Stats Bar */}
       <div className="flex justify-between items-center text-xs font-semibold text-slate-400">
         <p>
-          Mostrando {logs.length} de {total} eventos · ordenado desc por timestamp
+          Mostrando {logs.length} de {total} eventos · ordenado de forma descendente
         </p>
-        <Badge label="Retención: 7 años (RF-21)" variant="neutral" />
+        <Badge label="Retención: 7 años" variant="neutral" />
       </div>
 
       {error && (

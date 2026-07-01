@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, BookOpen, GraduationCap, PlusCircle, CheckCircle, Trash2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
@@ -77,7 +78,7 @@ const ModalMatricularIndividual: React.FC<ModalMatricularIndividualProps> = ({ o
     }
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box max-w-2xl overflow-hidden border-t-8 border-emerald-500 text-left" onClick={(e) => e.stopPropagation()}>
         
@@ -196,7 +197,7 @@ const ModalMatricularIndividual: React.FC<ModalMatricularIndividualProps> = ({ o
         </div>
       </div>
     </div>
-  );
+  , document.body);
 };
 
 export default ModalMatricularIndividual;

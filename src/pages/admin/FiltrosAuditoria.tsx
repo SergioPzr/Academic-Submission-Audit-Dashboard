@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Search, RotateCcw } from 'lucide-react';
 import { getTiposOperacion, type FiltrosAuditoria as FiltrosType } from '../../services/auditService';
+import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 
 interface FiltrosAuditoriaProps {
   onApplyFilters: (filtros: FiltrosType) => void;
@@ -51,65 +54,50 @@ const FiltrosAuditoria: React.FC<FiltrosAuditoriaProps> = ({
   };
 
   return (
-    <div className="card shadow-sm mb-6" style={{ padding: '1.5rem', backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-md)' }}>
+    <Card className="p-6 mb-6">
       <form onSubmit={handleApply} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         {/* Date Desde */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-          <label htmlFor="fechaDesde" className="text-subtitle font-semibold" style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
-            Desde
-          </label>
-          <input
-            type="date"
-            id="fechaDesde"
-            className="input w-full"
-            value={fechaDesde}
-            onChange={(e) => setFechaDesde(e.target.value)}
-            style={{ height: '42px' }}
-          />
-        </div>
+        <Input
+          type="date"
+          id="fechaDesde"
+          label="Desde"
+          value={fechaDesde}
+          onChange={(e) => setFechaDesde(e.target.value)}
+          disabled={loading}
+        />
 
         {/* Date Hasta */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-          <label htmlFor="fechaHasta" className="text-subtitle font-semibold" style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
-            Hasta
-          </label>
-          <input
-            type="date"
-            id="fechaHasta"
-            className="input w-full"
-            value={fechaHasta}
-            onChange={(e) => setFechaHasta(e.target.value)}
-            style={{ height: '42px' }}
-          />
-        </div>
+        <Input
+          type="date"
+          id="fechaHasta"
+          label="Hasta"
+          value={fechaHasta}
+          onChange={(e) => setFechaHasta(e.target.value)}
+          disabled={loading}
+        />
 
         {/* User Email */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-          <label htmlFor="emailUsuario" className="text-subtitle font-semibold" style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
-            ID de usuario (Correo)
-          </label>
-          <input
-            type="text"
-            id="emailUsuario"
-            placeholder="Buscar por correo..."
-            className="input w-full"
-            value={emailUsuario}
-            onChange={(e) => setEmailUsuario(e.target.value)}
-            style={{ height: '42px' }}
-          />
-        </div>
+        <Input
+          type="text"
+          id="emailUsuario"
+          label="ID de usuario (Correo)"
+          placeholder="Buscar por correo..."
+          value={emailUsuario}
+          onChange={(e) => setEmailUsuario(e.target.value)}
+          disabled={loading}
+        />
 
         {/* Operation Type Select */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-          <label htmlFor="tipoOperacion" className="text-subtitle font-semibold" style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
+        <div className="flex flex-col w-full text-left">
+          <label htmlFor="tipoOperacion" className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
             Tipo de operación
           </label>
           <select
             id="tipoOperacion"
-            className="input w-full"
+            className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-4 text-sm text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 cursor-pointer"
             value={tipoOperacion}
             onChange={(e) => setTipoOperacion(e.target.value)}
-            style={{ height: '42px', padding: '0.5rem 1rem' }}
+            disabled={loading}
           >
             <option value="Todas">Todas</option>
             {tipos.map((t) => (
@@ -121,30 +109,29 @@ const FiltrosAuditoria: React.FC<FiltrosAuditoriaProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="md:col-span-4" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem', width: '100%' }}>
-          <button
+        <div className="md:col-span-4 flex justify-end gap-3 mt-2 w-full">
+          <Button
             type="button"
+            variant="secondary"
             onClick={handleClear}
             disabled={loading}
-            className="btn btn-ghost"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            icon={<RotateCcw size={16} />}
           >
-            <RotateCcw size={16} />
-            <span>Limpiar</span>
-          </button>
+            Limpiar
+          </Button>
           
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="btn btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '140px', justifyContent: 'center' }}
+            variant="primary"
+            loading={loading}
+            icon={<Search size={16} />}
+            className="min-w-[140px]"
           >
-            <Search size={16} />
-            <span>{loading ? 'Buscando...' : 'Aplicar filtros'}</span>
-          </button>
+            Aplicar filtros
+          </Button>
         </div>
       </form>
-    </div>
+    </Card>
   );
 };
 

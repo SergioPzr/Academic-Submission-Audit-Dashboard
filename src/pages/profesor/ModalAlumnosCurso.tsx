@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Users, Search, GraduationCap } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
@@ -55,7 +56,7 @@ const ModalAlumnosCurso: React.FC<ModalAlumnosCursoProps> = ({
       a.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div 
         className="modal-box max-w-xl overflow-hidden border-t-8 border-emerald-500 text-left" 
@@ -148,7 +149,7 @@ const ModalAlumnosCurso: React.FC<ModalAlumnosCursoProps> = ({
         </div>
       </div>
     </div>
-  );
+  , document.body);
 };
 
 export default ModalAlumnosCurso;
